@@ -1,0 +1,14 @@
+/**
+ * gencode go -schema ./user.schema -package beans
+ */
+struct User{
+	Name string
+	Id   string
+	Age  int32
+	Con  Contact
+}
+
+struct Contact{
+	Tel   string
+	Email string
+}
