@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"hiphopkys/servers/hiphopkys/servers/horse/controllers"
+	"hiphopkys/servers/horse/controllers"
 	"github.com/astaxie/beego"
 )
 

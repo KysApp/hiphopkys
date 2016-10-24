@@ -6,7 +6,7 @@ import (
 	"testing"
 	"runtime"
 	"path/filepath"
-	_ "hiphopkys/servers/hiphopkys/servers/horse/routers"
+	_ "hiphopkys/servers/horse/routers"
 
 	"github.com/astaxie/beego"
 	. "github.com/smartystreets/goconvey/convey"
