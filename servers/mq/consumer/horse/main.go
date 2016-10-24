@@ -4,11 +4,13 @@ import (
 	"flag"
 	"github.com/astaxie/beego"
 	"github.com/gorilla/websocket"
+	"hiphopkys/servers/mq/consumer/horse/beans"
 	_ "hiphopkys/servers/mq/consumer/horse/handlers"
+	"log"
 	"net/http"
 )
 
-var addr = flag.String("addr", "localhost:8888", "http service address")
+var addr = flag.String("addr", "localhost:7475", "http service address")
 var upgrader = websocket.Upgrader{}
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -19,13 +21,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer ws.Close()
 	for {
-		mt, message, err := ws.ReadMessage()
+		_, message, err := ws.ReadMessage()
 		if err != nil {
 			beego.BeeLogger.Error("read:%s", err.Error())
 			break
 		}
-		beego.BeeLogger.Error("recv: %s", message)
-		err = ws.WriteMessage(mt, message)
+		reciveBean := beans.User{}
+		reciveBean.Unmarshal(message)
+		// beego.BeeLogger.Error("recv: %#v", reciveBean)
+		log.Printf("recv: %#v", reciveBean)
+		err = ws.WriteMessage(websocket.TextMessage, []byte("收到"))
 		if err != nil {
 			beego.BeeLogger.Error("write:%s", err.Error())
 			break
