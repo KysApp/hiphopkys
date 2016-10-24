@@ -12,3 +12,5 @@ struct Contact{
 	Tel   string
 	Email string
 }
+
+

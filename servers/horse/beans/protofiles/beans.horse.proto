@@ -1,0 +1,169 @@
+package beans;
+//protoc --go_out=../ beans.horse.proto 
+//./pbjs ../../../../assets/protofile/beans.devmessage.proto -t commonjs > ../../../../assets/beans/beans.devmessage.js
+
+/**
+ * 名词解释
+ * player_client: 玩家客户端，采集手机数据(陀螺仪，话筒数据等)的那一端口
+ * game_client: 游戏运行终端
+ * client: player_client && game_client
+ * server: 服务端
+ */
+
+/**
+ * client -> server
+ */
+enum RequestOperationCode{ //操作代码
+    REQUEST_OPERATIONCODE_PLAYERDEVICCEBEAN = 1; //传递陀螺仪信息
+    REQUEST_OPERATIONCODE_CREATEROOM = 2; //创建房间
+    REQUEST_OPERATIONCODE_JOINROOM = 3; //加入房间
+}
+
+/**
+ * server -> client
+ */
+enum SendMessageOperationCode{ //操作代码
+    SENDMESSAGE_OPERATIONCODE_RESPONSE = 1; //针对特定客户端的请求
+    SENDMESSAGE_OPERATIONCODE_PLAYERJOINGAME = 2; //新玩家加入游戏
+    SENDMESSAGE_OPERATIONCODE_PLAYERDEVICE = 3; //玩家陀螺仪信息
+    SENDMESSAGE_OPERATIONCODE_HORSEGAME_SPEED = 4; //赛马游戏server计算出的速度
+}
+
+/**
+ * client -> server
+ * 创建房间
+ */
+message CreateRoomBean{
+	optional string game_id = 1;
+	optional float longitude = 2 [default = 0.0]; //经度
+  optional float latitude = 3 [default = 0.0]; //维度
+  optional string ip = 4 [default = "0.0.0.0"]; //开启房间终端的IP
+  optional string device_info = 5; //终端设备信息
+}
+
+
+/**
+ * client -> server
+ * 申请加入房间
+ */
+message JoinRoomBean{
+  optional string game_id = 6;
+	optional string tocken = 1; //用户访问令牌
+	optional float longitude = 2 [default = 0.0]; //经度
+  optional float latitude = 3 [default = 0.0]; //维度
+  optional string ip = 4 [default = "0.0.0.0"]; //开启房间终端的IP
+  optional string device_info = 5; //终端设备信息
+}
+
+
+
+/**
+ * client -> server
+ * server -> client
+ * player_client端陀螺仪信息
+ */
+message PlayerDeviceBean{
+    optional string tocken = 11;
+    optional string game_id = 10;
+    optional float angle_alpha = 1 [default = 0.0];
+    optional float angle_beta = 2 [default = 0.0];
+    optional float angle_gamma = 3 [default = 0.0];
+    optional float acce_x = 4 [default = 0.0];
+    optional float acce_y = 5 [default = 0.0];
+    optional float acce_z = 6 [default = 0.0];
+    optional float acce_alpha = 7 [default = 0.0];
+    optional float acce_beta = 8 [default = 0.0];
+    optional float acce_gamma = 9 [default = 0.0];
+}
+
+
+/**
+ * server -> client
+ * player_client加入游戏后，server向game_client发送的新加入的player_client的信息
+ */
+message PlagerJoinGameBean{
+	optional string player_tocken = 1; //玩家tocken
+	optional string player_name = 2; //玩家姓名
+	optional int32 player_level = 3; //玩家等级
+}
+
+/**
+ * server -> client
+ * player_client离开游戏后server向game_client发送的离开房间的player_client的信息
+ */
+message PlayerLeaveGameBean{
+  optional string player_tocken = 1; //玩家tocken
+  optional string player_name = 2; //玩家姓名
+  optional int32 player_level = 3; //玩家等级
+}
+
+/**
+ * server -> client
+ * 赛马游戏中马的速度
+ */
+message HorseSpeedBean{
+  optional string player_tocken = 1; //玩家tocken
+  optional string player_name = 2; //玩家姓名
+  optional int32 player_level = 3; //玩家等级
+  optional float player_speed = 4; //server计算出的速度
+}
+
+
+
+/**
+ * 针对game_client创建房间请求的响应
+ */
+message ServerResponseCreateRoomBean{
+  optional int32 max_count = 1 [default = 0];
+  optional string room_id = 2;
+}
+
+/**
+ * 针对player_client申请加入房间的响应
+ */
+message ServerResponseJoinRoomBean{
+  optional string room_id = 1;
+}
+
+
+
+
+
+/**************************************************************************************************
+**                                            数据交互层
+**
+****************************************************************************************************/
+
+
+/**
+ * server -> client
+ * server向client发送的数据(响应，玩家加入与离开，玩家陀螺仪数据等)
+ */
+message ServerSendBean{
+  optional int32 result_code = 1 [default = 0];
+  optional string request_id = 2; //客户端请求ID(ClientRequestBean中的)
+  optional string desc = 3; //返回数据的描述
+  optional RequestOperationCode option_code = 4; //用户操作代码
+  oneof Bean{
+    ServerResponseCreateRoomBean response_createroom_bean = 5; 
+    ServerResponseJoinRoomBean response_joinroom_bean = 6;
+    PlagerJoinGameBean player_join_bean = 7;
+    PlayerLeaveGameBean player_level_bean = 8;
+    PlayerDeviceBean player_device_bean = 9;
+    HorseSpeedBean player_horsesgame_speed_bean = 10;
+  }
+}
+
+/**
+ * client -> server
+ * client向server发送的数据
+ */
+message ClientRequestBean{
+  optional string request_id = 1; //请求ID,由客户端生成。
+  optional RequestOperationCode option_code = 2; //client操作代码
+	oneof Bean{
+    CreateRoomBean createroom_bean = 3; //创建房间
+    JoinRoomBean joinroom_bean = 4; //加入房间
+    PlayerDeviceBean playerdevice_bean = 5;  //玩家手机信息
+  }
+}
