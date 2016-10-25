@@ -4,4 +4,4 @@
 
 
 
-![Alt text](https://ss2.baidu.com/6ONYsjip0QIZ8tyhnq/it/u=2917567124,2923991228&fm=80&w=179&h=119&img.JPEG "Optional title")
+![Alt text](https://github.com/KysApp/hiphopkys/blob/master/doc/icon60@3x.png?raw=true "Optional title")
