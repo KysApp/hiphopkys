@@ -26,4 +26,4 @@
 - 与游戏端通讯采用[websocket](https://github.com/gorilla/websocket)
 - 客户端通讯消息格式[protobuf](https://github.com/google/protobuf)
 - 消息队列通讯消息格式[gencode](https://github.com/andyleap/gencode)
-- 是哟的web框架[beego](https://beego.me/)
+- 使用的web框架[beego](https://beego.me/)
