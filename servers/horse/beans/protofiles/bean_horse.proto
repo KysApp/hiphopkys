@@ -4,10 +4,9 @@
 
 /**
  * protoc --gofast_out=.. ./bean_horse.proto
- * 
+ */
 
-syntax = "proto3";
-package beans;
+
 /**
  * 名词解释
  * player_client: 玩家客户端，采集手机数据(陀螺仪，话筒数据等)的那一端口
@@ -15,6 +14,12 @@ package beans;
  * client: player_client && game_client
  * server: 服务端
  */
+
+
+
+syntax = "proto3";
+package beans;
+
 /**
  * client -> server
  */
@@ -40,9 +45,8 @@ enum SendMessageOperationCode{ //操作代码
  */
 message CreateRoomBean{
 	 string game_id = 1;
-	 float longitude = 2 ; //经度
-   float latitude = 3; //维度
-   string ip = 4; //开启房间终端的IP
+	 double longitude = 2 ; //经度
+   double latitude = 3; //维度
    string device_info = 5; //终端设备信息
 }
 
@@ -53,7 +57,7 @@ message CreateRoomBean{
  */
 message JoinRoomBean{
    string game_id = 1;
-	 string tocken = 2; //用户访问令牌
+	 string player_tocken = 2; //用户访问令牌
 	 float longitude = 3; //经度
    float latitude = 4; //维度
    string ip = 5; //开启房间终端的IP
@@ -68,7 +72,7 @@ message JoinRoomBean{
  * player_client端陀螺仪信息
  */
 message PlayerDeviceBean{
-     string tocken = 11;
+     string player_tocken = 11;
      string game_id = 10;
      float angle_alpha = 1 ;
      float angle_beta = 2 ;

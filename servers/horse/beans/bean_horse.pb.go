@@ -91,9 +91,8 @@ func (x SendMessageOperationCode) String() string {
 // 创建房间
 type CreateRoomBean struct {
 	GameId     string  `protobuf:"bytes,1,opt,name=game_id,proto3" json:"game_id,omitempty"`
-	Longitude  float32 `protobuf:"fixed32,2,opt,name=longitude,proto3" json:"longitude,omitempty"`
-	Latitude   float32 `protobuf:"fixed32,3,opt,name=latitude,proto3" json:"latitude,omitempty"`
-	Ip         string  `protobuf:"bytes,4,opt,name=ip,proto3" json:"ip,omitempty"`
+	Longitude  float64 `protobuf:"fixed64,2,opt,name=longitude,proto3" json:"longitude,omitempty"`
+	Latitude   float64 `protobuf:"fixed64,3,opt,name=latitude,proto3" json:"latitude,omitempty"`
 	DeviceInfo string  `protobuf:"bytes,5,opt,name=device_info,proto3" json:"device_info,omitempty"`
 }
 
@@ -105,12 +104,12 @@ func (*CreateRoomBean) ProtoMessage()    {}
 // client -> server
 // 申请加入房间
 type JoinRoomBean struct {
-	GameId     string  `protobuf:"bytes,1,opt,name=game_id,proto3" json:"game_id,omitempty"`
-	Tocken     string  `protobuf:"bytes,2,opt,name=tocken,proto3" json:"tocken,omitempty"`
-	Longitude  float32 `protobuf:"fixed32,3,opt,name=longitude,proto3" json:"longitude,omitempty"`
-	Latitude   float32 `protobuf:"fixed32,4,opt,name=latitude,proto3" json:"latitude,omitempty"`
-	Ip         string  `protobuf:"bytes,5,opt,name=ip,proto3" json:"ip,omitempty"`
-	DeviceInfo string  `protobuf:"bytes,6,opt,name=device_info,proto3" json:"device_info,omitempty"`
+	GameId       string  `protobuf:"bytes,1,opt,name=game_id,proto3" json:"game_id,omitempty"`
+	PlayerTocken string  `protobuf:"bytes,2,opt,name=player_tocken,proto3" json:"player_tocken,omitempty"`
+	Longitude    float32 `protobuf:"fixed32,3,opt,name=longitude,proto3" json:"longitude,omitempty"`
+	Latitude     float32 `protobuf:"fixed32,4,opt,name=latitude,proto3" json:"latitude,omitempty"`
+	Ip           string  `protobuf:"bytes,5,opt,name=ip,proto3" json:"ip,omitempty"`
+	DeviceInfo   string  `protobuf:"bytes,6,opt,name=device_info,proto3" json:"device_info,omitempty"`
 }
 
 func (m *JoinRoomBean) Reset()         { *m = JoinRoomBean{} }
@@ -122,17 +121,17 @@ func (*JoinRoomBean) ProtoMessage()    {}
 // server -> client
 // player_client端陀螺仪信息
 type PlayerDeviceBean struct {
-	Tocken     string  `protobuf:"bytes,11,opt,name=tocken,proto3" json:"tocken,omitempty"`
-	GameId     string  `protobuf:"bytes,10,opt,name=game_id,proto3" json:"game_id,omitempty"`
-	AngleAlpha float32 `protobuf:"fixed32,1,opt,name=angle_alpha,proto3" json:"angle_alpha,omitempty"`
-	AngleBeta  float32 `protobuf:"fixed32,2,opt,name=angle_beta,proto3" json:"angle_beta,omitempty"`
-	AngleGamma float32 `protobuf:"fixed32,3,opt,name=angle_gamma,proto3" json:"angle_gamma,omitempty"`
-	AcceX      float32 `protobuf:"fixed32,4,opt,name=acce_x,proto3" json:"acce_x,omitempty"`
-	AcceY      float32 `protobuf:"fixed32,5,opt,name=acce_y,proto3" json:"acce_y,omitempty"`
-	AcceZ      float32 `protobuf:"fixed32,6,opt,name=acce_z,proto3" json:"acce_z,omitempty"`
-	AcceAlpha  float32 `protobuf:"fixed32,7,opt,name=acce_alpha,proto3" json:"acce_alpha,omitempty"`
-	AcceBeta   float32 `protobuf:"fixed32,8,opt,name=acce_beta,proto3" json:"acce_beta,omitempty"`
-	AcceGamma  float32 `protobuf:"fixed32,9,opt,name=acce_gamma,proto3" json:"acce_gamma,omitempty"`
+	PlayerTocken string  `protobuf:"bytes,11,opt,name=player_tocken,proto3" json:"player_tocken,omitempty"`
+	GameId       string  `protobuf:"bytes,10,opt,name=game_id,proto3" json:"game_id,omitempty"`
+	AngleAlpha   float32 `protobuf:"fixed32,1,opt,name=angle_alpha,proto3" json:"angle_alpha,omitempty"`
+	AngleBeta    float32 `protobuf:"fixed32,2,opt,name=angle_beta,proto3" json:"angle_beta,omitempty"`
+	AngleGamma   float32 `protobuf:"fixed32,3,opt,name=angle_gamma,proto3" json:"angle_gamma,omitempty"`
+	AcceX        float32 `protobuf:"fixed32,4,opt,name=acce_x,proto3" json:"acce_x,omitempty"`
+	AcceY        float32 `protobuf:"fixed32,5,opt,name=acce_y,proto3" json:"acce_y,omitempty"`
+	AcceZ        float32 `protobuf:"fixed32,6,opt,name=acce_z,proto3" json:"acce_z,omitempty"`
+	AcceAlpha    float32 `protobuf:"fixed32,7,opt,name=acce_alpha,proto3" json:"acce_alpha,omitempty"`
+	AcceBeta     float32 `protobuf:"fixed32,8,opt,name=acce_beta,proto3" json:"acce_beta,omitempty"`
+	AcceGamma    float32 `protobuf:"fixed32,9,opt,name=acce_gamma,proto3" json:"acce_gamma,omitempty"`
 }
 
 func (m *PlayerDeviceBean) Reset()         { *m = PlayerDeviceBean{} }
@@ -570,20 +569,14 @@ func (m *CreateRoomBean) MarshalTo(data []byte) (int, error) {
 		i += copy(data[i:], m.GameId)
 	}
 	if m.Longitude != 0 {
-		data[i] = 0x15
+		data[i] = 0x11
 		i++
-		i = encodeFixed32BeanHorse(data, i, uint32(math.Float32bits(m.Longitude)))
+		i = encodeFixed64BeanHorse(data, i, uint64(math.Float64bits(m.Longitude)))
 	}
 	if m.Latitude != 0 {
-		data[i] = 0x1d
+		data[i] = 0x19
 		i++
-		i = encodeFixed32BeanHorse(data, i, uint32(math.Float32bits(m.Latitude)))
-	}
-	if len(m.Ip) > 0 {
-		data[i] = 0x22
-		i++
-		i = encodeVarintBeanHorse(data, i, uint64(len(m.Ip)))
-		i += copy(data[i:], m.Ip)
+		i = encodeFixed64BeanHorse(data, i, uint64(math.Float64bits(m.Latitude)))
 	}
 	if len(m.DeviceInfo) > 0 {
 		data[i] = 0x2a
@@ -615,11 +608,11 @@ func (m *JoinRoomBean) MarshalTo(data []byte) (int, error) {
 		i = encodeVarintBeanHorse(data, i, uint64(len(m.GameId)))
 		i += copy(data[i:], m.GameId)
 	}
-	if len(m.Tocken) > 0 {
+	if len(m.PlayerTocken) > 0 {
 		data[i] = 0x12
 		i++
-		i = encodeVarintBeanHorse(data, i, uint64(len(m.Tocken)))
-		i += copy(data[i:], m.Tocken)
+		i = encodeVarintBeanHorse(data, i, uint64(len(m.PlayerTocken)))
+		i += copy(data[i:], m.PlayerTocken)
 	}
 	if m.Longitude != 0 {
 		data[i] = 0x1d
@@ -712,11 +705,11 @@ func (m *PlayerDeviceBean) MarshalTo(data []byte) (int, error) {
 		i = encodeVarintBeanHorse(data, i, uint64(len(m.GameId)))
 		i += copy(data[i:], m.GameId)
 	}
-	if len(m.Tocken) > 0 {
+	if len(m.PlayerTocken) > 0 {
 		data[i] = 0x5a
 		i++
-		i = encodeVarintBeanHorse(data, i, uint64(len(m.Tocken)))
-		i += copy(data[i:], m.Tocken)
+		i = encodeVarintBeanHorse(data, i, uint64(len(m.PlayerTocken)))
+		i += copy(data[i:], m.PlayerTocken)
 	}
 	return i, nil
 }
@@ -1128,14 +1121,10 @@ func (m *CreateRoomBean) Size() (n int) {
 		n += 1 + l + sovBeanHorse(uint64(l))
 	}
 	if m.Longitude != 0 {
-		n += 5
+		n += 9
 	}
 	if m.Latitude != 0 {
-		n += 5
-	}
-	l = len(m.Ip)
-	if l > 0 {
-		n += 1 + l + sovBeanHorse(uint64(l))
+		n += 9
 	}
 	l = len(m.DeviceInfo)
 	if l > 0 {
@@ -1151,7 +1140,7 @@ func (m *JoinRoomBean) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovBeanHorse(uint64(l))
 	}
-	l = len(m.Tocken)
+	l = len(m.PlayerTocken)
 	if l > 0 {
 		n += 1 + l + sovBeanHorse(uint64(l))
 	}
@@ -1206,7 +1195,7 @@ func (m *PlayerDeviceBean) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovBeanHorse(uint64(l))
 	}
-	l = len(m.Tocken)
+	l = len(m.PlayerTocken)
 	if l > 0 {
 		n += 1 + l + sovBeanHorse(uint64(l))
 	}
@@ -1483,62 +1472,41 @@ func (m *CreateRoomBean) Unmarshal(data []byte) error {
 			m.GameId = string(data[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
-			if wireType != 5 {
+			if wireType != 1 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Longitude", wireType)
 			}
-			var v uint32
-			if (iNdEx + 4) > l {
+			var v uint64
+			if (iNdEx + 8) > l {
 				return io.ErrUnexpectedEOF
 			}
-			iNdEx += 4
-			v = uint32(data[iNdEx-4])
-			v |= uint32(data[iNdEx-3]) << 8
-			v |= uint32(data[iNdEx-2]) << 16
-			v |= uint32(data[iNdEx-1]) << 24
-			m.Longitude = float32(math.Float32frombits(v))
+			iNdEx += 8
+			v = uint64(data[iNdEx-8])
+			v |= uint64(data[iNdEx-7]) << 8
+			v |= uint64(data[iNdEx-6]) << 16
+			v |= uint64(data[iNdEx-5]) << 24
+			v |= uint64(data[iNdEx-4]) << 32
+			v |= uint64(data[iNdEx-3]) << 40
+			v |= uint64(data[iNdEx-2]) << 48
+			v |= uint64(data[iNdEx-1]) << 56
+			m.Longitude = float64(math.Float64frombits(v))
 		case 3:
-			if wireType != 5 {
+			if wireType != 1 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Latitude", wireType)
 			}
-			var v uint32
-			if (iNdEx + 4) > l {
+			var v uint64
+			if (iNdEx + 8) > l {
 				return io.ErrUnexpectedEOF
 			}
-			iNdEx += 4
-			v = uint32(data[iNdEx-4])
-			v |= uint32(data[iNdEx-3]) << 8
-			v |= uint32(data[iNdEx-2]) << 16
-			v |= uint32(data[iNdEx-1]) << 24
-			m.Latitude = float32(math.Float32frombits(v))
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Ip", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowBeanHorse
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := data[iNdEx]
-				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthBeanHorse
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Ip = string(data[iNdEx:postIndex])
-			iNdEx = postIndex
+			iNdEx += 8
+			v = uint64(data[iNdEx-8])
+			v |= uint64(data[iNdEx-7]) << 8
+			v |= uint64(data[iNdEx-6]) << 16
+			v |= uint64(data[iNdEx-5]) << 24
+			v |= uint64(data[iNdEx-4]) << 32
+			v |= uint64(data[iNdEx-3]) << 40
+			v |= uint64(data[iNdEx-2]) << 48
+			v |= uint64(data[iNdEx-1]) << 56
+			m.Latitude = float64(math.Float64frombits(v))
 		case 5:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field DeviceInfo", wireType)
@@ -1649,7 +1617,7 @@ func (m *JoinRoomBean) Unmarshal(data []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Tocken", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field PlayerTocken", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1674,7 +1642,7 @@ func (m *JoinRoomBean) Unmarshal(data []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Tocken = string(data[iNdEx:postIndex])
+			m.PlayerTocken = string(data[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
 			if wireType != 5 {
@@ -1969,7 +1937,7 @@ func (m *PlayerDeviceBean) Unmarshal(data []byte) error {
 			iNdEx = postIndex
 		case 11:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Tocken", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field PlayerTocken", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1994,7 +1962,7 @@ func (m *PlayerDeviceBean) Unmarshal(data []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Tocken = string(data[iNdEx:postIndex])
+			m.PlayerTocken = string(data[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
