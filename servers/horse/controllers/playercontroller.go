@@ -7,11 +7,26 @@ import (
 	"github.com/gorilla/websocket"
 	"hiphopkys/servers/horse/beans"
 	"hiphopkys/servers/horse/models"
+	"sync"
 )
 
 var (
-	WaitJoinRommPlayerList = list.New() //玩家刚刚加入后加入到此队列,表示等待房间中
+	WaitCheckPlayerSafeList = struct { //玩家刚刚加入后加入到此队列,表示等待PRC验证Tocken
+		sync.RWMutex
+		List *list.List
+	}{List: list.New()}
+
+	WaitJoinRommPlayerList = struct { //玩家PRC验证完tocken后加入此队列等待加入房间
+		sync.RWMutex
+		List *list.List
+	}{List: list.New()}
+
+	JoinRommWaitPlayingPlayerSafeMap = struct { //加入房间以后
+		sync.RWMutex
+		Map map[string]*models.Player
+	}{Map: make([string]*models.Player)}
 )
+
 var (
 	WaitJoinRommPlayerChan = make(*models.Player, 500)
 )
@@ -24,7 +39,7 @@ func loop() {
 	for {
 		select {
 		case player := <-WaitJoinRommPlayerChan:
-			WaitJoinRommPlayerList.PushBack(player)
+			// WaitJoinRommPlayerList.PushBack(player)
 		}
 	}
 }

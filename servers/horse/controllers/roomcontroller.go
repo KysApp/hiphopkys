@@ -6,13 +6,29 @@ import (
 	"github.com/gorilla/websocket"
 	"hiphopkys/servers/horse/beans"
 	"hiphopkys/servers/horse/models"
+	"sync"
 )
 
 var (
-	WaitPlayerJoinRoomList  = list.New() //未满,正在等待玩家加入的房间队列
-	FullWaitPlayingRoolList = list.New() //已满,等待游戏开始的房间队列
-	PlayingRoomList         = list.New() //已满,游戏正在进行中的房间队列
-	PlayingEndRoomList      = list.New() //已满,一局游戏结束
+	WaitPlayerJoinRoomList = struct { //未满,正在等待玩家加入的房间队列
+		sync.RWMutex
+		List *list.List
+	}{List: list.New()}
+
+	FullWaitPlayingRoolList = struct { //已满,等待游戏开始的房间队列
+		sync.RWMutex
+		List *list.List
+	}{List: list.New()}
+
+	PlayingRoomList = struct { //已满,游戏正在进行中的房间队列
+		sync.RWMutex
+		List *list.List
+	}{List: list.New()}
+
+	PlayingEndRoomList = struct { //已满,一局游戏结束
+		sync.RWMutex
+		List *list.List
+	}{List: list.New()}
 )
 
 var (
@@ -45,7 +61,7 @@ func init() {
  */
 func CreateRoomHandler(requestId string, conn *websocket.Conn, bean *beans.CreateRoomBean) {
 	roomModel := models.NewRoomModel(conn, bean.GameId, bean.Longitude, bean.Latitude, bean.DeviceInfo)
-	WaitPlayerJoinRoomList <- roomModel
+	JoinWaitPlayRoomChan <- roomModel
 }
 
 /**
@@ -56,7 +72,9 @@ func loop_prepareStartGame() {
 	for {
 		select {
 		case <-PrepareStartGameChan:
-			frontElement := FullWaitPlayingRoolList.Front()
+			FullWaitPlayingRoolList.RLock()
+			frontElement := FullWaitPlayingRoolList.List.Front()
+			FullWaitPlayingRoolList.RUnlock()
 			if nil == frontElement {
 				beego.BeeLogger.Error("FullWaitPlayingRoolList为空")
 				break
@@ -72,7 +90,9 @@ func loop_prepareStartGame() {
 			****************************************
 			****************************************/
 			//准备工作完毕后从FullWaitPlayingRoolList删除
-			FullWaitPlayingRoolList.Remove(frontElement)
+			FullWaitPlayingRoolList.Lock()
+			FullWaitPlayingRoolList.List.Remove(frontElement)
+			FullWaitPlayingRoolList.Unlock()
 			JoinPlayingRoomChan <- roomModel
 		}
 	}
@@ -114,16 +134,22 @@ func loop() {
 	for {
 		select {
 		case roomModel := <-JoinWaitPlayRoomChan: //未满,正在等待玩家加入的房间队列
-			WaitPlayerJoinRoomList.PushBack(roomModel)
+			WaitPlayerJoinRoomList.Lock()
+			WaitPlayerJoinRoomList.List.PushBack(roomModel)
+			WaitPlayerJoinRoomList.Unlock()
 			roomModel.RoomState = models.ROOM_STATE_WAITJOIN
 			break
 		case roomModel := <-JoinFullWaitPlayingRoomChan: //已满,等待游戏开始的房间队列,这里只负责添加，删除部分需要信号传递方处理
-			FullWaitPlayingRoolList.PushBack(roomModel)
+			FullWaitPlayingRoolList.Lock()
+			FullWaitPlayingRoolList.List.PushBack(roomModel)
+			FullWaitPlayingRoolList.Unlock()
 			roomModel.RoomState = models.ROOM_STATE_FULL_WAIT_PLAYING
 			PrepareStartGameChan <- '0' //发送消息给loop_prepareStartGame，完成游戏开始前的准备工作
 			break
 		case roomModel := <-JoinPlayingRoomChan: //已满,游戏正在进行中的房间队列
+			PlayingRoomList.Lock()
 			PlayingRoomList.PushBack(roomModel)
+			PlayingRoomList.Unlock()
 			roomModel.RoomState = models.ROOM_STATE_PLAYING
 			NowStartGameChan <- '0'
 			break
