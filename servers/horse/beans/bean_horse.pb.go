@@ -106,8 +106,8 @@ func (*CreateRoomBean) ProtoMessage()    {}
 type JoinRoomBean struct {
 	GameId       string  `protobuf:"bytes,1,opt,name=game_id,proto3" json:"game_id,omitempty"`
 	PlayerTocken string  `protobuf:"bytes,2,opt,name=player_tocken,proto3" json:"player_tocken,omitempty"`
-	Longitude    float32 `protobuf:"fixed32,3,opt,name=longitude,proto3" json:"longitude,omitempty"`
-	Latitude     float32 `protobuf:"fixed32,4,opt,name=latitude,proto3" json:"latitude,omitempty"`
+	Longitude    float64 `protobuf:"fixed64,3,opt,name=longitude,proto3" json:"longitude,omitempty"`
+	Latitude     float64 `protobuf:"fixed64,4,opt,name=latitude,proto3" json:"latitude,omitempty"`
 	Ip           string  `protobuf:"bytes,5,opt,name=ip,proto3" json:"ip,omitempty"`
 	DeviceInfo   string  `protobuf:"bytes,6,opt,name=device_info,proto3" json:"device_info,omitempty"`
 }
@@ -123,15 +123,15 @@ func (*JoinRoomBean) ProtoMessage()    {}
 type PlayerDeviceBean struct {
 	PlayerTocken string  `protobuf:"bytes,11,opt,name=player_tocken,proto3" json:"player_tocken,omitempty"`
 	GameId       string  `protobuf:"bytes,10,opt,name=game_id,proto3" json:"game_id,omitempty"`
-	AngleAlpha   float32 `protobuf:"fixed32,1,opt,name=angle_alpha,proto3" json:"angle_alpha,omitempty"`
-	AngleBeta    float32 `protobuf:"fixed32,2,opt,name=angle_beta,proto3" json:"angle_beta,omitempty"`
-	AngleGamma   float32 `protobuf:"fixed32,3,opt,name=angle_gamma,proto3" json:"angle_gamma,omitempty"`
-	AcceX        float32 `protobuf:"fixed32,4,opt,name=acce_x,proto3" json:"acce_x,omitempty"`
-	AcceY        float32 `protobuf:"fixed32,5,opt,name=acce_y,proto3" json:"acce_y,omitempty"`
-	AcceZ        float32 `protobuf:"fixed32,6,opt,name=acce_z,proto3" json:"acce_z,omitempty"`
-	AcceAlpha    float32 `protobuf:"fixed32,7,opt,name=acce_alpha,proto3" json:"acce_alpha,omitempty"`
-	AcceBeta     float32 `protobuf:"fixed32,8,opt,name=acce_beta,proto3" json:"acce_beta,omitempty"`
-	AcceGamma    float32 `protobuf:"fixed32,9,opt,name=acce_gamma,proto3" json:"acce_gamma,omitempty"`
+	AngleAlpha   float64 `protobuf:"fixed64,1,opt,name=angle_alpha,proto3" json:"angle_alpha,omitempty"`
+	AngleBeta    float64 `protobuf:"fixed64,2,opt,name=angle_beta,proto3" json:"angle_beta,omitempty"`
+	AngleGamma   float64 `protobuf:"fixed64,3,opt,name=angle_gamma,proto3" json:"angle_gamma,omitempty"`
+	AcceX        float64 `protobuf:"fixed64,4,opt,name=acce_x,proto3" json:"acce_x,omitempty"`
+	AcceY        float64 `protobuf:"fixed64,5,opt,name=acce_y,proto3" json:"acce_y,omitempty"`
+	AcceZ        float64 `protobuf:"fixed64,6,opt,name=acce_z,proto3" json:"acce_z,omitempty"`
+	AcceAlpha    float64 `protobuf:"fixed64,7,opt,name=acce_alpha,proto3" json:"acce_alpha,omitempty"`
+	AcceBeta     float64 `protobuf:"fixed64,8,opt,name=acce_beta,proto3" json:"acce_beta,omitempty"`
+	AcceGamma    float64 `protobuf:"fixed64,9,opt,name=acce_gamma,proto3" json:"acce_gamma,omitempty"`
 }
 
 func (m *PlayerDeviceBean) Reset()         { *m = PlayerDeviceBean{} }
@@ -171,7 +171,7 @@ type HorseSpeedBean struct {
 	PlayerTocken string  `protobuf:"bytes,1,opt,name=player_tocken,proto3" json:"player_tocken,omitempty"`
 	PlayerName   string  `protobuf:"bytes,2,opt,name=player_name,proto3" json:"player_name,omitempty"`
 	PlayerLevel  int32   `protobuf:"varint,3,opt,name=player_level,proto3" json:"player_level,omitempty"`
-	PlayerSpeed  float32 `protobuf:"fixed32,4,opt,name=player_speed,proto3" json:"player_speed,omitempty"`
+	PlayerSpeed  float64 `protobuf:"fixed64,4,opt,name=player_speed,proto3" json:"player_speed,omitempty"`
 }
 
 func (m *HorseSpeedBean) Reset()         { *m = HorseSpeedBean{} }
@@ -615,14 +615,14 @@ func (m *JoinRoomBean) MarshalTo(data []byte) (int, error) {
 		i += copy(data[i:], m.PlayerTocken)
 	}
 	if m.Longitude != 0 {
-		data[i] = 0x1d
+		data[i] = 0x19
 		i++
-		i = encodeFixed32BeanHorse(data, i, uint32(math.Float32bits(m.Longitude)))
+		i = encodeFixed64BeanHorse(data, i, uint64(math.Float64bits(m.Longitude)))
 	}
 	if m.Latitude != 0 {
-		data[i] = 0x25
+		data[i] = 0x21
 		i++
-		i = encodeFixed32BeanHorse(data, i, uint32(math.Float32bits(m.Latitude)))
+		i = encodeFixed64BeanHorse(data, i, uint64(math.Float64bits(m.Latitude)))
 	}
 	if len(m.Ip) > 0 {
 		data[i] = 0x2a
@@ -655,49 +655,49 @@ func (m *PlayerDeviceBean) MarshalTo(data []byte) (int, error) {
 	var l int
 	_ = l
 	if m.AngleAlpha != 0 {
-		data[i] = 0xd
+		data[i] = 0x9
 		i++
-		i = encodeFixed32BeanHorse(data, i, uint32(math.Float32bits(m.AngleAlpha)))
+		i = encodeFixed64BeanHorse(data, i, uint64(math.Float64bits(m.AngleAlpha)))
 	}
 	if m.AngleBeta != 0 {
-		data[i] = 0x15
+		data[i] = 0x11
 		i++
-		i = encodeFixed32BeanHorse(data, i, uint32(math.Float32bits(m.AngleBeta)))
+		i = encodeFixed64BeanHorse(data, i, uint64(math.Float64bits(m.AngleBeta)))
 	}
 	if m.AngleGamma != 0 {
-		data[i] = 0x1d
+		data[i] = 0x19
 		i++
-		i = encodeFixed32BeanHorse(data, i, uint32(math.Float32bits(m.AngleGamma)))
+		i = encodeFixed64BeanHorse(data, i, uint64(math.Float64bits(m.AngleGamma)))
 	}
 	if m.AcceX != 0 {
-		data[i] = 0x25
+		data[i] = 0x21
 		i++
-		i = encodeFixed32BeanHorse(data, i, uint32(math.Float32bits(m.AcceX)))
+		i = encodeFixed64BeanHorse(data, i, uint64(math.Float64bits(m.AcceX)))
 	}
 	if m.AcceY != 0 {
-		data[i] = 0x2d
+		data[i] = 0x29
 		i++
-		i = encodeFixed32BeanHorse(data, i, uint32(math.Float32bits(m.AcceY)))
+		i = encodeFixed64BeanHorse(data, i, uint64(math.Float64bits(m.AcceY)))
 	}
 	if m.AcceZ != 0 {
-		data[i] = 0x35
+		data[i] = 0x31
 		i++
-		i = encodeFixed32BeanHorse(data, i, uint32(math.Float32bits(m.AcceZ)))
+		i = encodeFixed64BeanHorse(data, i, uint64(math.Float64bits(m.AcceZ)))
 	}
 	if m.AcceAlpha != 0 {
-		data[i] = 0x3d
+		data[i] = 0x39
 		i++
-		i = encodeFixed32BeanHorse(data, i, uint32(math.Float32bits(m.AcceAlpha)))
+		i = encodeFixed64BeanHorse(data, i, uint64(math.Float64bits(m.AcceAlpha)))
 	}
 	if m.AcceBeta != 0 {
-		data[i] = 0x45
+		data[i] = 0x41
 		i++
-		i = encodeFixed32BeanHorse(data, i, uint32(math.Float32bits(m.AcceBeta)))
+		i = encodeFixed64BeanHorse(data, i, uint64(math.Float64bits(m.AcceBeta)))
 	}
 	if m.AcceGamma != 0 {
-		data[i] = 0x4d
+		data[i] = 0x49
 		i++
-		i = encodeFixed32BeanHorse(data, i, uint32(math.Float32bits(m.AcceGamma)))
+		i = encodeFixed64BeanHorse(data, i, uint64(math.Float64bits(m.AcceGamma)))
 	}
 	if len(m.GameId) > 0 {
 		data[i] = 0x52
@@ -817,9 +817,9 @@ func (m *HorseSpeedBean) MarshalTo(data []byte) (int, error) {
 		i = encodeVarintBeanHorse(data, i, uint64(m.PlayerLevel))
 	}
 	if m.PlayerSpeed != 0 {
-		data[i] = 0x25
+		data[i] = 0x21
 		i++
-		i = encodeFixed32BeanHorse(data, i, uint32(math.Float32bits(m.PlayerSpeed)))
+		i = encodeFixed64BeanHorse(data, i, uint64(math.Float64bits(m.PlayerSpeed)))
 	}
 	return i, nil
 }
@@ -1145,10 +1145,10 @@ func (m *JoinRoomBean) Size() (n int) {
 		n += 1 + l + sovBeanHorse(uint64(l))
 	}
 	if m.Longitude != 0 {
-		n += 5
+		n += 9
 	}
 	if m.Latitude != 0 {
-		n += 5
+		n += 9
 	}
 	l = len(m.Ip)
 	if l > 0 {
@@ -1165,31 +1165,31 @@ func (m *PlayerDeviceBean) Size() (n int) {
 	var l int
 	_ = l
 	if m.AngleAlpha != 0 {
-		n += 5
+		n += 9
 	}
 	if m.AngleBeta != 0 {
-		n += 5
+		n += 9
 	}
 	if m.AngleGamma != 0 {
-		n += 5
+		n += 9
 	}
 	if m.AcceX != 0 {
-		n += 5
+		n += 9
 	}
 	if m.AcceY != 0 {
-		n += 5
+		n += 9
 	}
 	if m.AcceZ != 0 {
-		n += 5
+		n += 9
 	}
 	if m.AcceAlpha != 0 {
-		n += 5
+		n += 9
 	}
 	if m.AcceBeta != 0 {
-		n += 5
+		n += 9
 	}
 	if m.AcceGamma != 0 {
-		n += 5
+		n += 9
 	}
 	l = len(m.GameId)
 	if l > 0 {
@@ -1251,7 +1251,7 @@ func (m *HorseSpeedBean) Size() (n int) {
 		n += 1 + sovBeanHorse(uint64(m.PlayerLevel))
 	}
 	if m.PlayerSpeed != 0 {
-		n += 5
+		n += 9
 	}
 	return n
 }
@@ -1645,33 +1645,41 @@ func (m *JoinRoomBean) Unmarshal(data []byte) error {
 			m.PlayerTocken = string(data[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
-			if wireType != 5 {
+			if wireType != 1 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Longitude", wireType)
 			}
-			var v uint32
-			if (iNdEx + 4) > l {
+			var v uint64
+			if (iNdEx + 8) > l {
 				return io.ErrUnexpectedEOF
 			}
-			iNdEx += 4
-			v = uint32(data[iNdEx-4])
-			v |= uint32(data[iNdEx-3]) << 8
-			v |= uint32(data[iNdEx-2]) << 16
-			v |= uint32(data[iNdEx-1]) << 24
-			m.Longitude = float32(math.Float32frombits(v))
+			iNdEx += 8
+			v = uint64(data[iNdEx-8])
+			v |= uint64(data[iNdEx-7]) << 8
+			v |= uint64(data[iNdEx-6]) << 16
+			v |= uint64(data[iNdEx-5]) << 24
+			v |= uint64(data[iNdEx-4]) << 32
+			v |= uint64(data[iNdEx-3]) << 40
+			v |= uint64(data[iNdEx-2]) << 48
+			v |= uint64(data[iNdEx-1]) << 56
+			m.Longitude = float64(math.Float64frombits(v))
 		case 4:
-			if wireType != 5 {
+			if wireType != 1 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Latitude", wireType)
 			}
-			var v uint32
-			if (iNdEx + 4) > l {
+			var v uint64
+			if (iNdEx + 8) > l {
 				return io.ErrUnexpectedEOF
 			}
-			iNdEx += 4
-			v = uint32(data[iNdEx-4])
-			v |= uint32(data[iNdEx-3]) << 8
-			v |= uint32(data[iNdEx-2]) << 16
-			v |= uint32(data[iNdEx-1]) << 24
-			m.Latitude = float32(math.Float32frombits(v))
+			iNdEx += 8
+			v = uint64(data[iNdEx-8])
+			v |= uint64(data[iNdEx-7]) << 8
+			v |= uint64(data[iNdEx-6]) << 16
+			v |= uint64(data[iNdEx-5]) << 24
+			v |= uint64(data[iNdEx-4]) << 32
+			v |= uint64(data[iNdEx-3]) << 40
+			v |= uint64(data[iNdEx-2]) << 48
+			v |= uint64(data[iNdEx-1]) << 56
+			m.Latitude = float64(math.Float64frombits(v))
 		case 5:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Ip", wireType)
@@ -1781,131 +1789,167 @@ func (m *PlayerDeviceBean) Unmarshal(data []byte) error {
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 5 {
+			if wireType != 1 {
 				return fmt.Errorf("proto: wrong wireType = %d for field AngleAlpha", wireType)
 			}
-			var v uint32
-			if (iNdEx + 4) > l {
+			var v uint64
+			if (iNdEx + 8) > l {
 				return io.ErrUnexpectedEOF
 			}
-			iNdEx += 4
-			v = uint32(data[iNdEx-4])
-			v |= uint32(data[iNdEx-3]) << 8
-			v |= uint32(data[iNdEx-2]) << 16
-			v |= uint32(data[iNdEx-1]) << 24
-			m.AngleAlpha = float32(math.Float32frombits(v))
+			iNdEx += 8
+			v = uint64(data[iNdEx-8])
+			v |= uint64(data[iNdEx-7]) << 8
+			v |= uint64(data[iNdEx-6]) << 16
+			v |= uint64(data[iNdEx-5]) << 24
+			v |= uint64(data[iNdEx-4]) << 32
+			v |= uint64(data[iNdEx-3]) << 40
+			v |= uint64(data[iNdEx-2]) << 48
+			v |= uint64(data[iNdEx-1]) << 56
+			m.AngleAlpha = float64(math.Float64frombits(v))
 		case 2:
-			if wireType != 5 {
+			if wireType != 1 {
 				return fmt.Errorf("proto: wrong wireType = %d for field AngleBeta", wireType)
 			}
-			var v uint32
-			if (iNdEx + 4) > l {
+			var v uint64
+			if (iNdEx + 8) > l {
 				return io.ErrUnexpectedEOF
 			}
-			iNdEx += 4
-			v = uint32(data[iNdEx-4])
-			v |= uint32(data[iNdEx-3]) << 8
-			v |= uint32(data[iNdEx-2]) << 16
-			v |= uint32(data[iNdEx-1]) << 24
-			m.AngleBeta = float32(math.Float32frombits(v))
+			iNdEx += 8
+			v = uint64(data[iNdEx-8])
+			v |= uint64(data[iNdEx-7]) << 8
+			v |= uint64(data[iNdEx-6]) << 16
+			v |= uint64(data[iNdEx-5]) << 24
+			v |= uint64(data[iNdEx-4]) << 32
+			v |= uint64(data[iNdEx-3]) << 40
+			v |= uint64(data[iNdEx-2]) << 48
+			v |= uint64(data[iNdEx-1]) << 56
+			m.AngleBeta = float64(math.Float64frombits(v))
 		case 3:
-			if wireType != 5 {
+			if wireType != 1 {
 				return fmt.Errorf("proto: wrong wireType = %d for field AngleGamma", wireType)
 			}
-			var v uint32
-			if (iNdEx + 4) > l {
+			var v uint64
+			if (iNdEx + 8) > l {
 				return io.ErrUnexpectedEOF
 			}
-			iNdEx += 4
-			v = uint32(data[iNdEx-4])
-			v |= uint32(data[iNdEx-3]) << 8
-			v |= uint32(data[iNdEx-2]) << 16
-			v |= uint32(data[iNdEx-1]) << 24
-			m.AngleGamma = float32(math.Float32frombits(v))
+			iNdEx += 8
+			v = uint64(data[iNdEx-8])
+			v |= uint64(data[iNdEx-7]) << 8
+			v |= uint64(data[iNdEx-6]) << 16
+			v |= uint64(data[iNdEx-5]) << 24
+			v |= uint64(data[iNdEx-4]) << 32
+			v |= uint64(data[iNdEx-3]) << 40
+			v |= uint64(data[iNdEx-2]) << 48
+			v |= uint64(data[iNdEx-1]) << 56
+			m.AngleGamma = float64(math.Float64frombits(v))
 		case 4:
-			if wireType != 5 {
+			if wireType != 1 {
 				return fmt.Errorf("proto: wrong wireType = %d for field AcceX", wireType)
 			}
-			var v uint32
-			if (iNdEx + 4) > l {
+			var v uint64
+			if (iNdEx + 8) > l {
 				return io.ErrUnexpectedEOF
 			}
-			iNdEx += 4
-			v = uint32(data[iNdEx-4])
-			v |= uint32(data[iNdEx-3]) << 8
-			v |= uint32(data[iNdEx-2]) << 16
-			v |= uint32(data[iNdEx-1]) << 24
-			m.AcceX = float32(math.Float32frombits(v))
+			iNdEx += 8
+			v = uint64(data[iNdEx-8])
+			v |= uint64(data[iNdEx-7]) << 8
+			v |= uint64(data[iNdEx-6]) << 16
+			v |= uint64(data[iNdEx-5]) << 24
+			v |= uint64(data[iNdEx-4]) << 32
+			v |= uint64(data[iNdEx-3]) << 40
+			v |= uint64(data[iNdEx-2]) << 48
+			v |= uint64(data[iNdEx-1]) << 56
+			m.AcceX = float64(math.Float64frombits(v))
 		case 5:
-			if wireType != 5 {
+			if wireType != 1 {
 				return fmt.Errorf("proto: wrong wireType = %d for field AcceY", wireType)
 			}
-			var v uint32
-			if (iNdEx + 4) > l {
+			var v uint64
+			if (iNdEx + 8) > l {
 				return io.ErrUnexpectedEOF
 			}
-			iNdEx += 4
-			v = uint32(data[iNdEx-4])
-			v |= uint32(data[iNdEx-3]) << 8
-			v |= uint32(data[iNdEx-2]) << 16
-			v |= uint32(data[iNdEx-1]) << 24
-			m.AcceY = float32(math.Float32frombits(v))
+			iNdEx += 8
+			v = uint64(data[iNdEx-8])
+			v |= uint64(data[iNdEx-7]) << 8
+			v |= uint64(data[iNdEx-6]) << 16
+			v |= uint64(data[iNdEx-5]) << 24
+			v |= uint64(data[iNdEx-4]) << 32
+			v |= uint64(data[iNdEx-3]) << 40
+			v |= uint64(data[iNdEx-2]) << 48
+			v |= uint64(data[iNdEx-1]) << 56
+			m.AcceY = float64(math.Float64frombits(v))
 		case 6:
-			if wireType != 5 {
+			if wireType != 1 {
 				return fmt.Errorf("proto: wrong wireType = %d for field AcceZ", wireType)
 			}
-			var v uint32
-			if (iNdEx + 4) > l {
+			var v uint64
+			if (iNdEx + 8) > l {
 				return io.ErrUnexpectedEOF
 			}
-			iNdEx += 4
-			v = uint32(data[iNdEx-4])
-			v |= uint32(data[iNdEx-3]) << 8
-			v |= uint32(data[iNdEx-2]) << 16
-			v |= uint32(data[iNdEx-1]) << 24
-			m.AcceZ = float32(math.Float32frombits(v))
+			iNdEx += 8
+			v = uint64(data[iNdEx-8])
+			v |= uint64(data[iNdEx-7]) << 8
+			v |= uint64(data[iNdEx-6]) << 16
+			v |= uint64(data[iNdEx-5]) << 24
+			v |= uint64(data[iNdEx-4]) << 32
+			v |= uint64(data[iNdEx-3]) << 40
+			v |= uint64(data[iNdEx-2]) << 48
+			v |= uint64(data[iNdEx-1]) << 56
+			m.AcceZ = float64(math.Float64frombits(v))
 		case 7:
-			if wireType != 5 {
+			if wireType != 1 {
 				return fmt.Errorf("proto: wrong wireType = %d for field AcceAlpha", wireType)
 			}
-			var v uint32
-			if (iNdEx + 4) > l {
+			var v uint64
+			if (iNdEx + 8) > l {
 				return io.ErrUnexpectedEOF
 			}
-			iNdEx += 4
-			v = uint32(data[iNdEx-4])
-			v |= uint32(data[iNdEx-3]) << 8
-			v |= uint32(data[iNdEx-2]) << 16
-			v |= uint32(data[iNdEx-1]) << 24
-			m.AcceAlpha = float32(math.Float32frombits(v))
+			iNdEx += 8
+			v = uint64(data[iNdEx-8])
+			v |= uint64(data[iNdEx-7]) << 8
+			v |= uint64(data[iNdEx-6]) << 16
+			v |= uint64(data[iNdEx-5]) << 24
+			v |= uint64(data[iNdEx-4]) << 32
+			v |= uint64(data[iNdEx-3]) << 40
+			v |= uint64(data[iNdEx-2]) << 48
+			v |= uint64(data[iNdEx-1]) << 56
+			m.AcceAlpha = float64(math.Float64frombits(v))
 		case 8:
-			if wireType != 5 {
+			if wireType != 1 {
 				return fmt.Errorf("proto: wrong wireType = %d for field AcceBeta", wireType)
 			}
-			var v uint32
-			if (iNdEx + 4) > l {
+			var v uint64
+			if (iNdEx + 8) > l {
 				return io.ErrUnexpectedEOF
 			}
-			iNdEx += 4
-			v = uint32(data[iNdEx-4])
-			v |= uint32(data[iNdEx-3]) << 8
-			v |= uint32(data[iNdEx-2]) << 16
-			v |= uint32(data[iNdEx-1]) << 24
-			m.AcceBeta = float32(math.Float32frombits(v))
+			iNdEx += 8
+			v = uint64(data[iNdEx-8])
+			v |= uint64(data[iNdEx-7]) << 8
+			v |= uint64(data[iNdEx-6]) << 16
+			v |= uint64(data[iNdEx-5]) << 24
+			v |= uint64(data[iNdEx-4]) << 32
+			v |= uint64(data[iNdEx-3]) << 40
+			v |= uint64(data[iNdEx-2]) << 48
+			v |= uint64(data[iNdEx-1]) << 56
+			m.AcceBeta = float64(math.Float64frombits(v))
 		case 9:
-			if wireType != 5 {
+			if wireType != 1 {
 				return fmt.Errorf("proto: wrong wireType = %d for field AcceGamma", wireType)
 			}
-			var v uint32
-			if (iNdEx + 4) > l {
+			var v uint64
+			if (iNdEx + 8) > l {
 				return io.ErrUnexpectedEOF
 			}
-			iNdEx += 4
-			v = uint32(data[iNdEx-4])
-			v |= uint32(data[iNdEx-3]) << 8
-			v |= uint32(data[iNdEx-2]) << 16
-			v |= uint32(data[iNdEx-1]) << 24
-			m.AcceGamma = float32(math.Float32frombits(v))
+			iNdEx += 8
+			v = uint64(data[iNdEx-8])
+			v |= uint64(data[iNdEx-7]) << 8
+			v |= uint64(data[iNdEx-6]) << 16
+			v |= uint64(data[iNdEx-5]) << 24
+			v |= uint64(data[iNdEx-4]) << 32
+			v |= uint64(data[iNdEx-3]) << 40
+			v |= uint64(data[iNdEx-2]) << 48
+			v |= uint64(data[iNdEx-1]) << 56
+			m.AcceGamma = float64(math.Float64frombits(v))
 		case 10:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field GameId", wireType)
@@ -2346,19 +2390,23 @@ func (m *HorseSpeedBean) Unmarshal(data []byte) error {
 				}
 			}
 		case 4:
-			if wireType != 5 {
+			if wireType != 1 {
 				return fmt.Errorf("proto: wrong wireType = %d for field PlayerSpeed", wireType)
 			}
-			var v uint32
-			if (iNdEx + 4) > l {
+			var v uint64
+			if (iNdEx + 8) > l {
 				return io.ErrUnexpectedEOF
 			}
-			iNdEx += 4
-			v = uint32(data[iNdEx-4])
-			v |= uint32(data[iNdEx-3]) << 8
-			v |= uint32(data[iNdEx-2]) << 16
-			v |= uint32(data[iNdEx-1]) << 24
-			m.PlayerSpeed = float32(math.Float32frombits(v))
+			iNdEx += 8
+			v = uint64(data[iNdEx-8])
+			v |= uint64(data[iNdEx-7]) << 8
+			v |= uint64(data[iNdEx-6]) << 16
+			v |= uint64(data[iNdEx-5]) << 24
+			v |= uint64(data[iNdEx-4]) << 32
+			v |= uint64(data[iNdEx-3]) << 40
+			v |= uint64(data[iNdEx-2]) << 48
+			v |= uint64(data[iNdEx-1]) << 56
+			m.PlayerSpeed = float64(math.Float64frombits(v))
 		default:
 			iNdEx = preIndex
 			skippy, err := skipBeanHorse(data[iNdEx:])

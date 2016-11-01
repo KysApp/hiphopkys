@@ -24,7 +24,7 @@ func (this *SocketmanController) WebSocketJoin() {
 		return
 	}
 
-	go func() {
+	go func(ws *websocket.Conn) {
 		defer ws.Close()
 		for {
 			_, buffer, err := ws.ReadMessage()
@@ -43,6 +43,7 @@ func (this *SocketmanController) WebSocketJoin() {
 			case beans.RequestOperationCode_REQUEST_OPERATIONCODE_CREATEROOM: //创建房间
 				createRoomBean := bean.GetCreateroomBean()
 				beego.BeeLogger.Error("创建房间,requestID:%s,收到的数据:%#v", requestId, createRoomBean)
+				CreateRoomHandler(requestId, ws, createRoomBean)
 				// CreateRoomHandler(ws, createRoomBean, requestId)
 				break
 			case beans.RequestOperationCode_REQUEST_OPERATIONCODE_JOINROOM: //加入房间
@@ -55,7 +56,7 @@ func (this *SocketmanController) WebSocketJoin() {
 				break
 			}
 		}
-	}()
+	}(ws)
 
 }
 

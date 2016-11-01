@@ -2,6 +2,7 @@ package models
 
 import (
 	"container/list"
+	"github.com/astaxie/beego"
 	"github.com/gorilla/websocket"
 	"labix.org/v2/mgo/bson"
 )
@@ -12,6 +13,7 @@ const (
 	ROOM_STATE_WAITJOIN          RoomStateValue = iota //未满,正在等待玩家加入的房间队列
 	ROOM_STATE_FULL_WAIT_PLAYING                       //已满,等待游戏开始的房间队列
 	ROOM_STATE_PLAYING                                 //已满,游戏正在进行中的房间队列
+	ROOM_STATE_PLAYING_END                             //已满,一局游戏结束
 )
 
 type RoomModel struct {
@@ -23,6 +25,7 @@ type RoomModel struct {
 	RoomState        RoomStateValue  //房间状态
 	Conn             *websocket.Conn //PC端WebSocket链接
 	PlayerTockenList *list.List      //房间中玩家tocken队列
+	Capacity         int32           //房间中最多容纳玩家个数
 }
 
 func NewRoomModel(conn *websocket.Conn, gameId string, longitude float64, latitude float64, deviceInfo string) *RoomModel {
@@ -34,6 +37,12 @@ func NewRoomModel(conn *websocket.Conn, gameId string, longitude float64, latitu
 		RoomState:        ROOM_STATE_WAITJOIN,
 		Conn:             conn,
 		PlayerTockenList: list.New(),
+	}
+	if conf_cap, err := beego.AppConfig.Int("room::capacity"); err != nil {
+		beego.BeeLogger.Error("读取配置信息room::capacity失败:%s", err.Error())
+		return nil
+	} else {
+		room.Capacity = int32(conf_cap)
 	}
 	return room
 }

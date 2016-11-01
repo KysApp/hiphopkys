@@ -58,8 +58,8 @@ message CreateRoomBean{
 message JoinRoomBean{
    string game_id = 1;
 	 string player_tocken = 2; //用户访问令牌
-	 float longitude = 3; //经度
-   float latitude = 4; //维度
+	 double longitude = 3; //经度
+   double latitude = 4; //维度
    string ip = 5; //开启房间终端的IP
    string device_info = 6; //终端设备信息
 }
@@ -74,15 +74,15 @@ message JoinRoomBean{
 message PlayerDeviceBean{
      string player_tocken = 11;
      string game_id = 10;
-     float angle_alpha = 1 ;
-     float angle_beta = 2 ;
-     float angle_gamma = 3 ;
-     float acce_x = 4 ;
-     float acce_y = 5 ;
-     float acce_z = 6 ;
-     float acce_alpha = 7 ;
-     float acce_beta = 8 ;
-     float acce_gamma = 9;
+     double angle_alpha = 1 ;
+     double angle_beta = 2 ;
+     double angle_gamma = 3 ;
+     double acce_x = 4 ;
+     double acce_y = 5 ;
+     double acce_z = 6 ;
+     double acce_alpha = 7 ;
+     double acce_beta = 8 ;
+     double acce_gamma = 9;
 }
 
 
@@ -114,7 +114,7 @@ message HorseSpeedBean{
    string player_tocken = 1; //玩家tocken
    string player_name = 2; //玩家姓名
    int32 player_level = 3; //玩家等级
-   float player_speed = 4; //server计算出的速度
+   double player_speed = 4; //server计算出的速度
 }
 
 /**
