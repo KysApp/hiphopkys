@@ -1,0 +1,205 @@
+/**
+ * ./pbjs ../../../assets/Script/beans/protofiles/beans_horse.proto -t commonjs > * ../../../assets/Script/beans/beans_horse.js
+ */
+
+/**
+ * protoc --gofast_out=.. ./bean_horse.proto
+ */
+
+
+/**
+ * 名词解释
+ * player_client: 玩家客户端，采集手机数据(陀螺仪，话筒数据等)的那一端口
+ * game_client: 游戏运行终端
+ * client: player_client && game_client
+ * server: 服务端
+ */
+
+
+
+syntax = "proto3";
+package beans;
+
+/**
+ * client -> server
+ */
+enum RequestOperationCode{ //操作代码
+    REQUEST_OPERATIONCODE_FIGHTDIZHU = 0; //抢地主
+    REQUEST_OPERATIONCODE_CARD = 1; //出牌
+    REQUEST_OPERATIONCODE_JOINROOM = 2; //加入房间
+    REQUEST_OPERATIONCODE_OPEN_ROBOT = 3; //开启机器模式
+    REQUEST_OPERATIONCODE_CLOSE_ROBOT = 4; //关闭机器模式
+    REQUEST_OPERATIONCODE_READY = 5; //一局游戏结束后完成清理工作后,向server发送表示准备好新一轮游戏
+}
+
+/**
+ * server -> client
+ */
+enum ResponseOperationCode{ //操作代码
+    SENDMESSAGE_OPERATIONCODE_RESPONSE = 0; //针对特定客户端的请求
+    SENDMESSAGE_OPERATIONCODE_PLAYERJOINGAME = 1; //新玩家加入游戏
+    SENDMESSAGE_OPERATIONCODE_SENDCARD_CMD = 2; //人满，开始发牌
+    SENDMESSAGE_OPERATIONCODE_PREPARESTART = 3; //发牌结束,开始抢地主
+    SENDMESSAGE_OPERATIONCODE_CARD = 4; //出牌
+    SENDMESSAGE_OPERATIONCODE_DIZHUDECIDE = 5; //确定地主,正式开始游戏(会发送地主ID)
+    SENDMESSAGE_OPERATIONCODE_ROOMID = 6; //玩家申请到房间后返回房间ID
+    SENDMESSAGE_OPERATIONCODE_CLEARN_CMD = 7; //清除房间其他两人,等待新玩家加入
+    SENDMESSAGE_OPERATIONCODE_RESTART = 8; //一局结束将要重新开始(客户端收到此消息后:1:清理页面 2:向server发送REQUEST_OPERATIONCODE_READY)
+}
+
+
+/**
+ * client -> server
+ * 申请加入房间
+ */
+message RequestApplyJoinRoomBean{
+	 string player_tocken = 1; //用户访问令牌
+   string device_info = 2; //终端设备信息
+}
+
+/**
+ * client -> server
+ * 抢地主
+ */
+message RequestFightDizhuBean{
+   string player_id = 1; //用户id
+   string room_id = 2; //房间ID
+   bool is_dizhu = 3; //true:抢 false:不抢
+}
+
+
+/**
+ * client -> server
+ * 出牌
+ */
+message RequestCardBean{
+   string player_id = 1; //用户id
+   repeated string card_id_array = 2; //牌
+   string room_id = 3; //房间ID
+   int32 remainder = 4; //该玩家剩余牌数目
+}
+
+/**
+ * client -> server
+ * 开启机器模式
+ */
+message RequestOpenRobot{
+   string player_id = 1; //用户id
+   string room_id = 2; //房间ID
+}
+
+/**
+ * client -> server
+ * 关闭机器模式
+ */
+message RequestCloseRobot{
+   string player_id = 1; //用户id
+   string room_id = 2; //房间ID
+}
+
+
+/**
+ * client -> server
+ * 一局游戏结束后完成清理工作后,向server发送表示准备好新一轮游戏
+ */
+message RequestReadyBean{
+   string player_id = 1; //用户id
+   string room_id = 2; //房间ID
+}
+
+/**
+ * server -> client
+ * player加入房间以后返回房间id
+ */
+message ResponseSendRoomID{
+  string room_id = 1;
+}
+
+/**
+ * server -> client
+ * player_client加入游戏后，server向game_client发送的新加入的player_client的信息
+ */
+message ResponsePlagerJoinGameBean{
+	 string player_id = 1; //玩家id
+	 string player_name = 2; //玩家姓名
+	 int32 player_level = 3; //玩家等级
+}
+
+/**
+ * server -> client
+ * 
+ */
+message ResponseCardBean{
+  string player_id = 1; //玩家id
+  repeated string card_id_array = 2; //牌
+}
+
+
+/**
+ * server -> client
+ * 人满,开始发牌(每个玩家的牌由服务器生成)
+ */
+message ResponseSendCardBeanArray{
+  repeated ResponseCardBean card_bean_array = 1;
+}
+
+/**
+ * server -> client
+ * 客户端发起抢地主请求后,server确定谁是地主,将地主玩家id发送给每个客户端（这里只抢一轮，如果只有一个人抢则此人为地主，若不止一人则server随机选一个）
+ */
+message ResponseDefineDizhu{
+  string player_id = 1; //地主id
+}
+
+/**
+ * server -> client
+ * server向client发送其他玩家出牌
+ */
+message ResponseBordcastOtherPlayerCard{
+  string player_id = 1;
+  repeated string card_id_array = 2; //牌
+  int32 remainder = 3; //该玩家剩余牌数目
+}
+
+
+
+/**************************************************************************************************
+**                                            数据交互层
+**
+****************************************************************************************************/
+
+
+/**
+ * server -> client
+ * server向client发送的数据(响应，玩家加入与离开，玩家陀螺仪数据等)
+ */
+message ServerResponseBean{
+   int32 error_code = 1 ;
+   string request_id = 2; //客户端请求ID(ClientRequestBean中的)
+   string desc = 3; //返回数据的描述
+   ResponseOperationCode option_code = 4; //用户操作代码
+  oneof Bean{
+    ResponseSendRoomID send_room_id_bean = 5; //发送分配的房间号
+    ResponsePlagerJoinGameBean player_join_bean = 6; //新玩家加入，传入新玩家信息
+    ResponseSendCardBeanArray card_array_bean = 7; //人满,开始发牌(每个玩家的牌由服务器生成)
+    ResponseDefineDizhu dizhu_bean = 8; //客户端发起抢地主请求后,server确定谁是地主,将地主玩家id发送给每个客户端（这里只抢一轮，如果只有一个人抢则此人为地主，若不止一人则server随机选一个）
+    ResponseBordcastOtherPlayerCard other_cards = 9; //server向client发送其他玩家出牌
+  }
+}
+
+/**
+ * client -> server
+ * client向server发送的数据
+ */
+message ClientRequestBean{
+   string request_id = 1; //请求ID,由客户端生成。
+   RequestOperationCode option_code = 2; //client操作代码
+	oneof Bean{
+    RequestApplyJoinRoomBean join_room_bean = 3; // 申请加入房间
+    RequestFightDizhuBean fight_dizhu_bean = 4; //抢地主
+    RequestCardBean send_card_bean = 5; //出牌
+    RequestOpenRobot open_robot_bean = 6; //开启机器人
+    RequestCloseRobot close_robot_bean = 7;//关闭机器人
+    RequestReadyBean ready_bean = 8; //准备开始新一轮游戏
+   }
+}

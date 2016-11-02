@@ -1,34 +1,19 @@
 package controllers
 
 import (
-	"container/list"
 	"github.com/astaxie/beego"
 	"github.com/gorilla/websocket"
+	"hiphopkys/servers/commons/container/list"
 	"hiphopkys/servers/horse/beans"
 	"hiphopkys/servers/horse/models"
 	"sync"
 )
 
 var (
-	WaitPlayerJoinRoomList = struct { //未满,正在等待玩家加入的房间队列
-		sync.RWMutex
-		List *list.List
-	}{List: list.New()}
-
-	FullWaitPlayingRoolList = struct { //已满,等待游戏开始的房间队列
-		sync.RWMutex
-		List *list.List
-	}{List: list.New()}
-
-	PlayingRoomList = struct { //已满,游戏正在进行中的房间队列
-		sync.RWMutex
-		List *list.List
-	}{List: list.New()}
-
-	PlayingEndRoomList = struct { //已满,一局游戏结束
-		sync.RWMutex
-		List *list.List
-	}{List: list.New()}
+	WaitPlayerJoinRoomList  = list.New() //未满,正在等待玩家加入的房间队列
+	FullWaitPlayingRoolList = list.New() //已满,等待游戏开始的房间队列
+	PlayingRoomList         = list.New() //已满,游戏正在进行中的房间队列
+	PlayingEndRoomList      = list.New() //已满,一局游戏结束
 )
 
 var (
@@ -72,9 +57,7 @@ func loop_prepareStartGame() {
 	for {
 		select {
 		case <-PrepareStartGameChan:
-			FullWaitPlayingRoolList.RLock()
-			frontElement := FullWaitPlayingRoolList.List.Front()
-			FullWaitPlayingRoolList.RUnlock()
+			frontElement := FullWaitPlayingRoolList.Front()
 			if nil == frontElement {
 				beego.BeeLogger.Error("FullWaitPlayingRoolList为空")
 				break
@@ -134,22 +117,16 @@ func loop() {
 	for {
 		select {
 		case roomModel := <-JoinWaitPlayRoomChan: //未满,正在等待玩家加入的房间队列
-			WaitPlayerJoinRoomList.Lock()
-			WaitPlayerJoinRoomList.List.PushBack(roomModel)
-			WaitPlayerJoinRoomList.Unlock()
+			WaitPlayerJoinRoomList.PushBack(roomModel)
 			roomModel.RoomState = models.ROOM_STATE_WAITJOIN
 			break
 		case roomModel := <-JoinFullWaitPlayingRoomChan: //已满,等待游戏开始的房间队列,这里只负责添加，删除部分需要信号传递方处理
-			FullWaitPlayingRoolList.Lock()
-			FullWaitPlayingRoolList.List.PushBack(roomModel)
-			FullWaitPlayingRoolList.Unlock()
+			FullWaitPlayingRoolList.PushBack(roomModel)
 			roomModel.RoomState = models.ROOM_STATE_FULL_WAIT_PLAYING
 			PrepareStartGameChan <- '0' //发送消息给loop_prepareStartGame，完成游戏开始前的准备工作
 			break
 		case roomModel := <-JoinPlayingRoomChan: //已满,游戏正在进行中的房间队列
-			PlayingRoomList.Lock()
 			PlayingRoomList.PushBack(roomModel)
-			PlayingRoomList.Unlock()
 			roomModel.RoomState = models.ROOM_STATE_PLAYING
 			NowStartGameChan <- '0'
 			break

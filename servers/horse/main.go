@@ -1,11 +1,15 @@
 package main
 
 import (
-	_ "hiphopkys/servers/horse/routers"
 	"github.com/astaxie/beego"
+	_ "hiphopkys/servers/horse/routers"
+	"runtime"
 )
 
+func init() {
+	cpuNum := runtime.NumCPU()
+	runtime.GOMAXPROCS(cpuNum)
+}
 func main() {
 	beego.Run()
 }
-
