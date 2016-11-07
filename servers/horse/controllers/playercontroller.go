@@ -13,41 +13,49 @@ import (
 )
 
 var (
-	AppointmentWaitJoinPlayerChan = make(chan string, 500) //预约玩家排队等待进入房间Channel(高优先级)
+	AppointmentWaitJoinPlayerChan = make(chan string, 500)              //预约玩家排队等待进入房间Channel(高优先级)
+	WaitRPCCheckPlayerChan        = make(chan string, 500)              //等待PRC验证Channel
+	RPCCheckSuccessSignChan       = make(chan string, 500)              //rpc验证成功信号
+	RPCCheckErrorSignChan         = make(*beans.RPCResponse, 500)       //rpc验证失败，玩家没有权限
+	StoragePlayerInstanceChan     = make(chan *models.PlayerModel, 500) //存储PlayerModel实体Channel
+	WaitJoinRommPlayerChan        = make(*models.PlayerModel, 500)      //玩家排队等待进入房间Channel
 )
 var (
-	PlayerId2RoomInstanceMap = smap.New() //记录所有的用户实体
-)
-var (
-	WaitCheckPlayerSafeList = struct { //玩家刚刚加入后加入到此队列,表示等待PRC验证Tocken
-		sync.RWMutex
-		List *list.List
-	}{List: list.New()}
-
-	WaitJoinRommPlayerList = struct { //玩家PRC验证完tocken后加入此队列等待加入房间
-		sync.RWMutex
-		List *list.List
-	}{List: list.New()}
-
-	JoinRommWaitPlayingPlayerSafeMap = struct { //加入房间以后
-		sync.RWMutex
-		Map map[string]*models.Player
-	}{Map: make([string]*models.Player)}
-)
-
-var (
-	WaitJoinRommPlayerChan = make(*models.Player, 500)
+	PlayerId2PlayerInstanceMap = smap.New() //记录所有的用户实体
 )
 
 func init() {
-	go loop()
+	go loop_storage_playerInstance()
+	go loop_rpc_check()
+	go loop_player_property_dispatch()
 }
 
-func loop() {
+func loop_storage_playerInstance() {
 	for {
 		select {
-		case player := <-WaitJoinRommPlayerChan:
-			// WaitJoinRommPlayerList.PushBack(player)
+		case playerModel := <-StoragePlayerInstanceChan:
+			PlayerId2PlayerInstanceMap.Insert(playerModel.PlayerId, playerModel)
+			WaitRPCCheckPlayerChan <- playerModel.PlayerId
+		}
+	}
+}
+
+/**
+ * RPC玩家验证模块
+ * @return {[type]} [description]
+ */
+func loop_rpc_check() {
+	for {
+		select {
+		case playerID := <-WaitRPCCheckPlayerChan:
+			playerModel := (PlayerId2PlayerInstanceMap.Get(playerID)).(*models.PlayerModel)
+			go checkPlayer(playerModel)
+		case rpcResponseBean := <-RPCCheckErrorSignChan: //rpc验证失败
+		/**
+		 * 错误处理,返回给客户端提示稍后重试
+		 */
+		case playerID := <-RPCCheckSuccessSignChan: //rpc验证成功
+			WaitJoinRommPlayerChan <- playerID
 		}
 	}
 }
@@ -57,41 +65,49 @@ func loop() {
  * @param  {[type]} player *models.Player [description]
  * @return {[type]}        [description]
  */
-func checkPlayer(player *models.Player) {
+func checkPlayer(player *models.PlayerModel) {
 	url := beego.AppConfig.String("rpc::checkplayerurl")
 	req := httplib.Post(url)
 	responseBean := beans.RPCResponse{}
 	err := req.ToJSON(&responseBean)
 	if err != nil {
-		beego.BeeLogger.Error("RPC::checkPlayer错误,返回结果不合法:%s", err.Error())
-		/**
-		 * 错误处理,返回给客户端提示稍后重试
-		 */
-		// player.Conn.Close()
+		responseBean.ErrorCode = beego.AppConfig.String("errcode::rpc_response_format_error")
+		responseBean.Desc = "内部错误:远程服务器返回信息格式有误"
+		RPCCheckErrorSignChan <- responseBean
 		return
 	}
-	if responseBean.ErrorCode != "0" { //不成功
-		beego.BeeLogger.Error("RPC::checkPlayer错误:%s", responseBean.Desc)
-		/**
-		 * 错误处理,用户没有权限或其他错误,返回个客户端
-		 */
+	if responseBean.ErrorCode != "0" { //验证失败
+		RPCCheckErrorSignChan <- responseBean
 		return
 	}
 	checkBean, err := responseBean.Data.(*beans.UserCheckData)
 	if err != nil {
-		beego.BeeLogger.Error("RPC::checkPlayer错误,返回结果不合法:%s", err.Error())
-		/**
-		 * 错误处理,返回给客户端提示稍后重试
-		 */
-		// player.Conn.Close()
+		responseBean.ErrorCode = beego.AppConfig.String("errcode::rpc_response_format_error")
+		responseBean.Desc = "内部错误:远程服务器返回信息格式有误"
+		RPCCheckErrorSignChan <- responseBean
 		return
 	}
 	player.PlayerLevel = int32(checkBean.Level)
 	player.PlayerName = checkBean.Name
 	player.UserId = checkBean.UserId
+	RPCCheckSuccessSignChan <- player.PlayerId
+}
+
+/**
+ * 玩家属性分配模块,查看Redies判断是否是预约玩家并进行相应的分组
+ * @return {[type]} [description]
+ */
+func loop_player_property_dispatch() {
+	for {
+		select {
+		case playerID := <-WaitJoinRommPlayerChan:
+			playerModel := (PlayerId2PlayerInstanceMap.Get(playerID)).(*models.RoomModel) //此刻是在rpc验证之后，所以playerModel.UserId有效,需要在Redies中查找相应的预约ID(AppointmentId)
+
+		}
+	}
 }
 
 func PlayerJoin(requestId string, conn *websocket.Conn, bean *beans.JoinRoomBean) {
 	player := models.NewPlayer(conn, bean.PlayerTocken, bean.Longitude, bean.Latitude, bean.DeviceInfo)
-	go checkPlayer(player)
+	StoragePlayerInstanceChan <- player
 }

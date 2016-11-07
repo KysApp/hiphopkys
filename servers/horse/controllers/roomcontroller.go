@@ -101,12 +101,20 @@ func loop_roomstate_update() {
 	}
 }
 
+/**
+ * 游戏启动准备模块
+ * @return {[type]} [description]
+ */
 func loop_prepare_startgame() {
 	for {
 		select {
 		case roomID := <-PrepareStartGameRoomChan:
 			WaitPlayerJoinRoomList.RemoveFirstElementWithValue(roomID)
-
+			PlayingRoomList.PushBack(roomID)
+			/*
+			 * 通知roomID对应的room下的所有玩家游戏开始
+			 *
+			 */
 		}
 	}
 }
