@@ -1,8 +1,9 @@
 package beans
 
 type UserCheckData struct {
-	Name  string `json:"name"`
-	Level int32  `json:"level"`
+	Name   string `json:"name"`
+	Level  int32  `json:"level"`
+	UserId string `json:user_id`
 }
 
 type RPCResponse struct {

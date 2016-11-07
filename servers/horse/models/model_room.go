@@ -6,6 +6,7 @@ import (
 	"hiphopkys/servers/commons/container/list"
 	"hiphopkys/servers/commons/container/slice"
 	"labix.org/v2/mgo/bson"
+	"strings"
 )
 
 type RoomStateValue int32
@@ -33,10 +34,13 @@ type RoomModel struct {
 	DeviceInfo         string           //PC端描述,可为空
 	RoomState          RoomStateValue   //房间状态
 	Conn               *websocket.Conn  //PC端WebSocket链接
-	PlayerTockenList   *list.SafeList   //房间中玩家tocken队列
+	PlayerUserIdList   *list.SafeList   //房间中玩家userId队列
 	Capacity           int32            //房间中最多容纳玩家个数
 	RoomType           RoomTypeValue    //进入该房间是通过IP自动匹配还是一个玩家受邀请聚在一个房间
 	PreparePlayerArray *slice.SafeSlice //预存玩家ID
+	Ip                 string           //PC端IP
+	AppointmentId      string           //预约ID,如果是预约玩家组成的房间，则此字段有效并且值与预约玩家的AppointmentId相同
+	NetworkSegment     string           //客户端网段
 }
 
 func NewRoomModel(conn *websocket.Conn, gameId string, longitude float64, latitude float64, deviceInfo string) *RoomModel {
@@ -47,7 +51,8 @@ func NewRoomModel(conn *websocket.Conn, gameId string, longitude float64, latitu
 		Latitude:         latitude,
 		RoomState:        ROOM_STATE_PREPARE,
 		Conn:             conn,
-		PlayerTockenList: list.New(),
+		PlayerUserIdList: list.New(),
+		Ip:               conn.RemoteAddr().String(),
 	}
 	if conf_cap, err := beego.AppConfig.Int("room::capacity"); err != nil {
 		beego.BeeLogger.Error("读取配置信息room::capacity失败:%s", err.Error())
@@ -55,5 +60,7 @@ func NewRoomModel(conn *websocket.Conn, gameId string, longitude float64, latitu
 	} else {
 		room.Capacity = int32(conf_cap)
 	}
+	index := strings.LastIndex(room.Ip, ".")
+	room.NetworkSegment = (room.Ip)[0:index]
 	return room
 }

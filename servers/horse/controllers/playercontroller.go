@@ -5,11 +5,19 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
 	"github.com/gorilla/websocket"
+	"hiphopkys/servers/commons/container/list"
+	"hiphopkys/servers/commons/container/smap"
 	"hiphopkys/servers/horse/beans"
 	"hiphopkys/servers/horse/models"
 	"sync"
 )
 
+var (
+	AppointmentWaitJoinPlayerChan = make(chan string, 500) //预约玩家排队等待进入房间Channel(高优先级)
+)
+var (
+	PlayerId2RoomInstanceMap = smap.New() //记录所有的用户实体
+)
 var (
 	WaitCheckPlayerSafeList = struct { //玩家刚刚加入后加入到此队列,表示等待PRC验证Tocken
 		sync.RWMutex
@@ -80,6 +88,7 @@ func checkPlayer(player *models.Player) {
 	}
 	player.PlayerLevel = int32(checkBean.Level)
 	player.PlayerName = checkBean.Name
+	player.UserId = checkBean.UserId
 }
 
 func PlayerJoin(requestId string, conn *websocket.Conn, bean *beans.JoinRoomBean) {

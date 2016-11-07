@@ -112,3 +112,18 @@ func (l *SafeList) MoveToFront(e *list.Element) {
 	l.List.MoveToFront(e)
 	l.Unlock()
 }
+
+func (l *SafeList) RemoveFirstElementWithValue(value interface{}) {
+	var item *list.Element
+	l.Lock()
+	for v := l.List.Front(); v != nil; v = v.Next() {
+		if value == v.Value {
+			item = v
+			break
+		}
+	}
+	if item != nil {
+		l.List.Remove(item)
+	}
+	l.Unlock()
+}
