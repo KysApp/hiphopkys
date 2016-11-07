@@ -1,0 +1,24 @@
+/**
+ * ./pbjs ../../../assets/Script/beans/protofiles/beans_horse.proto -t commonjs > * ../../../assets/Script/beans/beans_horse.js
+ */
+
+/**
+ * protoc --gofast_out=.. ./cache_models.proto 
+ */
+syntax = "proto3";
+package models;
+
+
+message AppointmentPlayerCacheModel{
+	 string user_id = 1; //玩家id
+	 int64 appointment_timestamp = 2; //玩家报名时间
+	 int32 limite_can_play_count = 3; //该玩家一共可以玩的次数
+}
+
+
+message AppointmentRoomCacheModel{
+	string  appointment_id = 1; //预约ID
+	int32 play_count = 2; //已玩次数
+	repeated AppointmentPlayerCacheModel model_id_array = 3; //预约玩家id列表
+}
+
