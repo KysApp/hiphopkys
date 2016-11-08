@@ -47,3 +47,38 @@ func newPool(server, password string) *redis.Pool {
 		},
 	}
 }
+
+/**
+ * 缓存中添加预约用户
+ * @param  {[type]} model *models.AppointmentPlayerCacheModel) (string, string [description]
+ * @return {(errorCode,desc)}       [description]
+ */
+func CachePushAppointmentUser(model *models.AppointmentPlayerCacheModel) (string, string) {
+	conn := RedisPool.Get()
+	defer conn.Close()
+	max, err := beego.AppConfig.Int("room::capacity")
+	if err != nil {
+		return beego.AppConfig.String("errcode::cache_push_appointmentuser_error_inner_code"), beego.AppConfig.String("errcode::cache_push_appointmentuser_error_inner_desc")
+	}
+	//获取数目
+	reply, err := conn.Do("SCARD", model.AppointmentId)
+	if err != nil {
+		return beego.AppConfig.String("errcode::cache_push_appointmentuser_error_inner_code"), beego.AppConfig.String("errcode::cache_push_appointmentuser_error_inner_desc")
+	}
+	count, err := redis.Int(reply, nil)
+	if err != nil {
+		return beego.AppConfig.String("errcode::cache_push_appointmentuser_error_inner_code"), beego.AppConfig.String("errcode::cache_push_appointmentuser_error_inner_desc")
+	}
+	if count >= max {
+		return beego.AppConfig.String("errcode::cache_push_appointmentuser_error_roomfull_code"), beego.AppConfig.String("errcode::cache_push_appointmentuser_error_roomfull_desc")
+	}
+	buffer, err := model.Marshal()
+	if err != nil {
+		return beego.AppConfig.String("errcode::cache_push_appointmentuser_error_inner_code"), beego.AppConfig.String("errcode::cache_push_appointmentuser_error_inner_desc")
+	}
+	_, err = conn.Do("SADD", model.AppointmentId, buffer)
+	if err != nil {
+		return beego.AppConfig.String("errcode::cache_push_appointmentuser_error_inner_code"), beego.AppConfig.String("errcode::cache_push_appointmentuser_error_inner_desc")
+	}
+	return "0", "操作成功"
+}

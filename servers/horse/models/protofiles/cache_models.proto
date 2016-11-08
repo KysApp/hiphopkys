@@ -10,9 +10,10 @@ package models;
 
 
 message AppointmentPlayerCacheModel{
-	 string user_id = 1; //玩家id
-	 int64 appointment_timestamp = 2; //玩家报名时间
-	 int32 limite_can_play_count = 3; //该玩家一共可以玩的次数
+	 string  appointment_id = 1; //预约ID
+	 string user_id = 2; //玩家id
+	 int64 appointment_timestamp = 3; //玩家报名时间
+	 int32 limite_can_play_count = 4; //该玩家一共可以玩的次数
 }
 
 

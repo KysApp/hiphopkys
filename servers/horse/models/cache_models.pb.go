@@ -26,9 +26,10 @@ var _ = fmt.Errorf
 var _ = math.Inf
 
 type AppointmentPlayerCacheModel struct {
-	UserId               string `protobuf:"bytes,1,opt,name=user_id,proto3" json:"user_id,omitempty"`
-	AppointmentTimestamp int64  `protobuf:"varint,2,opt,name=appointment_timestamp,proto3" json:"appointment_timestamp,omitempty"`
-	LimiteCanPlayCount   int32  `protobuf:"varint,3,opt,name=limite_can_play_count,proto3" json:"limite_can_play_count,omitempty"`
+	AppointmentId        string `protobuf:"bytes,1,opt,name=appointment_id,proto3" json:"appointment_id,omitempty"`
+	UserId               string `protobuf:"bytes,2,opt,name=user_id,proto3" json:"user_id,omitempty"`
+	AppointmentTimestamp int64  `protobuf:"varint,3,opt,name=appointment_timestamp,proto3" json:"appointment_timestamp,omitempty"`
+	LimiteCanPlayCount   int32  `protobuf:"varint,4,opt,name=limite_can_play_count,proto3" json:"limite_can_play_count,omitempty"`
 }
 
 func (m *AppointmentPlayerCacheModel) Reset()         { *m = AppointmentPlayerCacheModel{} }
@@ -67,19 +68,25 @@ func (m *AppointmentPlayerCacheModel) MarshalTo(data []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.UserId) > 0 {
+	if len(m.AppointmentId) > 0 {
 		data[i] = 0xa
+		i++
+		i = encodeVarintCacheModels(data, i, uint64(len(m.AppointmentId)))
+		i += copy(data[i:], m.AppointmentId)
+	}
+	if len(m.UserId) > 0 {
+		data[i] = 0x12
 		i++
 		i = encodeVarintCacheModels(data, i, uint64(len(m.UserId)))
 		i += copy(data[i:], m.UserId)
 	}
 	if m.AppointmentTimestamp != 0 {
-		data[i] = 0x10
+		data[i] = 0x18
 		i++
 		i = encodeVarintCacheModels(data, i, uint64(m.AppointmentTimestamp))
 	}
 	if m.LimiteCanPlayCount != 0 {
-		data[i] = 0x18
+		data[i] = 0x20
 		i++
 		i = encodeVarintCacheModels(data, i, uint64(m.LimiteCanPlayCount))
 	}
@@ -157,6 +164,10 @@ func encodeVarintCacheModels(data []byte, offset int, v uint64) int {
 func (m *AppointmentPlayerCacheModel) Size() (n int) {
 	var l int
 	_ = l
+	l = len(m.AppointmentId)
+	if l > 0 {
+		n += 1 + l + sovCacheModels(uint64(l))
+	}
 	l = len(m.UserId)
 	if l > 0 {
 		n += 1 + l + sovCacheModels(uint64(l))
@@ -233,6 +244,35 @@ func (m *AppointmentPlayerCacheModel) Unmarshal(data []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AppointmentId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowCacheModels
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := data[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthCacheModels
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AppointmentId = string(data[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field UserId", wireType)
 			}
 			var stringLen uint64
@@ -260,7 +300,7 @@ func (m *AppointmentPlayerCacheModel) Unmarshal(data []byte) error {
 			}
 			m.UserId = string(data[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 2:
+		case 3:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field AppointmentTimestamp", wireType)
 			}
@@ -279,7 +319,7 @@ func (m *AppointmentPlayerCacheModel) Unmarshal(data []byte) error {
 					break
 				}
 			}
-		case 3:
+		case 4:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field LimiteCanPlayCount", wireType)
 			}

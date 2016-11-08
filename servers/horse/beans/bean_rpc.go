@@ -3,11 +3,12 @@ package beans
 type UserCheckData struct {
 	Name   string `json:"name"`
 	Level  int32  `json:"level"`
-	UserId string `json:user_id`
+	UserId string `json:"user_id"`
 }
 type AppointmentUser struct {
-	UserId        string `json:user_id`
-	AppointmentId string `json:appointment_id`
+	UserId             string `json:"user_id"`
+	AppointmentId      string `json:"appointment_id"`
+	LimiteCanPlayCount int32  `json:"can_play_count"`
 }
 
 type RPCResponse struct {
