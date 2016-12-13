@@ -4,6 +4,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/gorilla/websocket"
 	"hiphopkys/servers/horse/beans"
+	"hiphopkys/servers/horse/models"
 	"net/http"
 )
 
@@ -43,16 +44,18 @@ func (this *SocketmanController) WebSocketJoin() {
 			case beans.RequestOperationCode_REQUEST_OPERATIONCODE_CREATEROOM: //创建房间
 				createRoomBean := bean.GetCreateroomBean()
 				beego.BeeLogger.Error("创建房间,requestID:%s,收到的数据:%#v", requestId, createRoomBean)
-				CreateRoomHandler(requestId, ws, createRoomBean)
+				go CreateRoomHandler(requestId, ws, createRoomBean)
 				// CreateRoomHandler(ws, createRoomBean, requestId)
 				break
 			case beans.RequestOperationCode_REQUEST_OPERATIONCODE_JOINROOM: //加入房间
 				joinRoomBean := bean.GetJoinroomBean()
 				beego.BeeLogger.Error("加入房间,requestID:%s,收到的数据:%#v", requestId, joinRoomBean)
+				go PlayerJoin(requestId, ws, joinRoomBean)
 				break
 			case beans.RequestOperationCode_REQUEST_OPERATIONCODE_PLAYERDEVICCEBEAN: //玩家陀螺仪信息
 				playerDeviceBean := bean.GetPlayerdeviceBean()
 				beego.BeeLogger.Error("玩家陀螺仪信息,requestID:%s,收到的数据:%#v", requestId, playerDeviceBean)
+				go BroadcastWebSocket(playerDeviceBean)
 				break
 			}
 		}
@@ -60,6 +63,14 @@ func (this *SocketmanController) WebSocketJoin() {
 
 }
 
-func BroadcastWebSocket() {
-
+func BroadcastWebSocket(bean *beans.PlayerDeviceBean) {
+	beego.BeeLogger.Error("收到数据:%#v", bean)
+	v := RoomId2PlayingRoomMap.Get(bean.RoomId)
+	if nil != v {
+		roomModel := (v).(*models.RoomModel)
+		beego.BeeLogger.Error("房间信息:%#v", roomModel)
+		if buffer, err := bean.Marshal(); err == nil {
+			roomModel.Conn.WriteMessage(websocket.BinaryMessage, buffer)
+		}
+	}
 }

@@ -121,17 +121,19 @@ func (*JoinRoomBean) ProtoMessage()    {}
 // server -> client
 // player_client端陀螺仪信息
 type PlayerDeviceBean struct {
-	PlayerTocken string  `protobuf:"bytes,11,opt,name=player_tocken,proto3" json:"player_tocken,omitempty"`
-	GameId       string  `protobuf:"bytes,10,opt,name=game_id,proto3" json:"game_id,omitempty"`
-	AngleAlpha   float64 `protobuf:"fixed64,1,opt,name=angle_alpha,proto3" json:"angle_alpha,omitempty"`
-	AngleBeta    float64 `protobuf:"fixed64,2,opt,name=angle_beta,proto3" json:"angle_beta,omitempty"`
-	AngleGamma   float64 `protobuf:"fixed64,3,opt,name=angle_gamma,proto3" json:"angle_gamma,omitempty"`
-	AcceX        float64 `protobuf:"fixed64,4,opt,name=acce_x,proto3" json:"acce_x,omitempty"`
-	AcceY        float64 `protobuf:"fixed64,5,opt,name=acce_y,proto3" json:"acce_y,omitempty"`
-	AcceZ        float64 `protobuf:"fixed64,6,opt,name=acce_z,proto3" json:"acce_z,omitempty"`
-	AcceAlpha    float64 `protobuf:"fixed64,7,opt,name=acce_alpha,proto3" json:"acce_alpha,omitempty"`
-	AcceBeta     float64 `protobuf:"fixed64,8,opt,name=acce_beta,proto3" json:"acce_beta,omitempty"`
-	AcceGamma    float64 `protobuf:"fixed64,9,opt,name=acce_gamma,proto3" json:"acce_gamma,omitempty"`
+	PlayerId   string  `protobuf:"bytes,11,opt,name=player_id,proto3" json:"player_id,omitempty"`
+	PlayerName string  `protobuf:"bytes,13,opt,name=player_name,proto3" json:"player_name,omitempty"`
+	GameId     string  `protobuf:"bytes,10,opt,name=game_id,proto3" json:"game_id,omitempty"`
+	RoomId     string  `protobuf:"bytes,12,opt,name=room_id,proto3" json:"room_id,omitempty"`
+	AngleAlpha float64 `protobuf:"fixed64,1,opt,name=angle_alpha,proto3" json:"angle_alpha,omitempty"`
+	AngleBeta  float64 `protobuf:"fixed64,2,opt,name=angle_beta,proto3" json:"angle_beta,omitempty"`
+	AngleGamma float64 `protobuf:"fixed64,3,opt,name=angle_gamma,proto3" json:"angle_gamma,omitempty"`
+	AcceX      float64 `protobuf:"fixed64,4,opt,name=acce_x,proto3" json:"acce_x,omitempty"`
+	AcceY      float64 `protobuf:"fixed64,5,opt,name=acce_y,proto3" json:"acce_y,omitempty"`
+	AcceZ      float64 `protobuf:"fixed64,6,opt,name=acce_z,proto3" json:"acce_z,omitempty"`
+	AcceAlpha  float64 `protobuf:"fixed64,7,opt,name=acce_alpha,proto3" json:"acce_alpha,omitempty"`
+	AcceBeta   float64 `protobuf:"fixed64,8,opt,name=acce_beta,proto3" json:"acce_beta,omitempty"`
+	AcceGamma  float64 `protobuf:"fixed64,9,opt,name=acce_gamma,proto3" json:"acce_gamma,omitempty"`
 }
 
 func (m *PlayerDeviceBean) Reset()         { *m = PlayerDeviceBean{} }
@@ -142,9 +144,9 @@ func (*PlayerDeviceBean) ProtoMessage()    {}
 // server -> client
 // player_client加入游戏后，server向game_client发送的新加入的player_client的信息
 type PlagerJoinGameBean struct {
-	PlayerTocken string `protobuf:"bytes,1,opt,name=player_tocken,proto3" json:"player_tocken,omitempty"`
-	PlayerName   string `protobuf:"bytes,2,opt,name=player_name,proto3" json:"player_name,omitempty"`
-	PlayerLevel  int32  `protobuf:"varint,3,opt,name=player_level,proto3" json:"player_level,omitempty"`
+	PlayerId    string `protobuf:"bytes,1,opt,name=player_id,proto3" json:"player_id,omitempty"`
+	PlayerName  string `protobuf:"bytes,2,opt,name=player_name,proto3" json:"player_name,omitempty"`
+	PlayerLevel int32  `protobuf:"varint,3,opt,name=player_level,proto3" json:"player_level,omitempty"`
 }
 
 func (m *PlagerJoinGameBean) Reset()         { *m = PlagerJoinGameBean{} }
@@ -155,9 +157,9 @@ func (*PlagerJoinGameBean) ProtoMessage()    {}
 // server -> client
 // player_client离开游戏后server向game_client发送的离开房间的player_client的信息
 type PlayerLeaveGameBean struct {
-	PlayerTocken string `protobuf:"bytes,1,opt,name=player_tocken,proto3" json:"player_tocken,omitempty"`
-	PlayerName   string `protobuf:"bytes,2,opt,name=player_name,proto3" json:"player_name,omitempty"`
-	PlayerLevel  int32  `protobuf:"varint,3,opt,name=player_level,proto3" json:"player_level,omitempty"`
+	PlayerId    string `protobuf:"bytes,1,opt,name=player_id,proto3" json:"player_id,omitempty"`
+	PlayerName  string `protobuf:"bytes,2,opt,name=player_name,proto3" json:"player_name,omitempty"`
+	PlayerLevel int32  `protobuf:"varint,3,opt,name=player_level,proto3" json:"player_level,omitempty"`
 }
 
 func (m *PlayerLeaveGameBean) Reset()         { *m = PlayerLeaveGameBean{} }
@@ -168,10 +170,10 @@ func (*PlayerLeaveGameBean) ProtoMessage()    {}
 // server -> client
 // 赛马游戏中马的速度
 type HorseSpeedBean struct {
-	PlayerTocken string  `protobuf:"bytes,1,opt,name=player_tocken,proto3" json:"player_tocken,omitempty"`
-	PlayerName   string  `protobuf:"bytes,2,opt,name=player_name,proto3" json:"player_name,omitempty"`
-	PlayerLevel  int32   `protobuf:"varint,3,opt,name=player_level,proto3" json:"player_level,omitempty"`
-	PlayerSpeed  float64 `protobuf:"fixed64,4,opt,name=player_speed,proto3" json:"player_speed,omitempty"`
+	PlayerId    string  `protobuf:"bytes,1,opt,name=player_id,proto3" json:"player_id,omitempty"`
+	PlayerName  string  `protobuf:"bytes,2,opt,name=player_name,proto3" json:"player_name,omitempty"`
+	PlayerLevel int32   `protobuf:"varint,3,opt,name=player_level,proto3" json:"player_level,omitempty"`
+	PlayerSpeed float64 `protobuf:"fixed64,4,opt,name=player_speed,proto3" json:"player_speed,omitempty"`
 }
 
 func (m *HorseSpeedBean) Reset()         { *m = HorseSpeedBean{} }
@@ -705,11 +707,23 @@ func (m *PlayerDeviceBean) MarshalTo(data []byte) (int, error) {
 		i = encodeVarintBeanHorse(data, i, uint64(len(m.GameId)))
 		i += copy(data[i:], m.GameId)
 	}
-	if len(m.PlayerTocken) > 0 {
+	if len(m.PlayerId) > 0 {
 		data[i] = 0x5a
 		i++
-		i = encodeVarintBeanHorse(data, i, uint64(len(m.PlayerTocken)))
-		i += copy(data[i:], m.PlayerTocken)
+		i = encodeVarintBeanHorse(data, i, uint64(len(m.PlayerId)))
+		i += copy(data[i:], m.PlayerId)
+	}
+	if len(m.RoomId) > 0 {
+		data[i] = 0x62
+		i++
+		i = encodeVarintBeanHorse(data, i, uint64(len(m.RoomId)))
+		i += copy(data[i:], m.RoomId)
+	}
+	if len(m.PlayerName) > 0 {
+		data[i] = 0x6a
+		i++
+		i = encodeVarintBeanHorse(data, i, uint64(len(m.PlayerName)))
+		i += copy(data[i:], m.PlayerName)
 	}
 	return i, nil
 }
@@ -729,11 +743,11 @@ func (m *PlagerJoinGameBean) MarshalTo(data []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.PlayerTocken) > 0 {
+	if len(m.PlayerId) > 0 {
 		data[i] = 0xa
 		i++
-		i = encodeVarintBeanHorse(data, i, uint64(len(m.PlayerTocken)))
-		i += copy(data[i:], m.PlayerTocken)
+		i = encodeVarintBeanHorse(data, i, uint64(len(m.PlayerId)))
+		i += copy(data[i:], m.PlayerId)
 	}
 	if len(m.PlayerName) > 0 {
 		data[i] = 0x12
@@ -764,11 +778,11 @@ func (m *PlayerLeaveGameBean) MarshalTo(data []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.PlayerTocken) > 0 {
+	if len(m.PlayerId) > 0 {
 		data[i] = 0xa
 		i++
-		i = encodeVarintBeanHorse(data, i, uint64(len(m.PlayerTocken)))
-		i += copy(data[i:], m.PlayerTocken)
+		i = encodeVarintBeanHorse(data, i, uint64(len(m.PlayerId)))
+		i += copy(data[i:], m.PlayerId)
 	}
 	if len(m.PlayerName) > 0 {
 		data[i] = 0x12
@@ -799,11 +813,11 @@ func (m *HorseSpeedBean) MarshalTo(data []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.PlayerTocken) > 0 {
+	if len(m.PlayerId) > 0 {
 		data[i] = 0xa
 		i++
-		i = encodeVarintBeanHorse(data, i, uint64(len(m.PlayerTocken)))
-		i += copy(data[i:], m.PlayerTocken)
+		i = encodeVarintBeanHorse(data, i, uint64(len(m.PlayerId)))
+		i += copy(data[i:], m.PlayerId)
 	}
 	if len(m.PlayerName) > 0 {
 		data[i] = 0x12
@@ -1195,7 +1209,15 @@ func (m *PlayerDeviceBean) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovBeanHorse(uint64(l))
 	}
-	l = len(m.PlayerTocken)
+	l = len(m.PlayerId)
+	if l > 0 {
+		n += 1 + l + sovBeanHorse(uint64(l))
+	}
+	l = len(m.RoomId)
+	if l > 0 {
+		n += 1 + l + sovBeanHorse(uint64(l))
+	}
+	l = len(m.PlayerName)
 	if l > 0 {
 		n += 1 + l + sovBeanHorse(uint64(l))
 	}
@@ -1205,7 +1227,7 @@ func (m *PlayerDeviceBean) Size() (n int) {
 func (m *PlagerJoinGameBean) Size() (n int) {
 	var l int
 	_ = l
-	l = len(m.PlayerTocken)
+	l = len(m.PlayerId)
 	if l > 0 {
 		n += 1 + l + sovBeanHorse(uint64(l))
 	}
@@ -1222,7 +1244,7 @@ func (m *PlagerJoinGameBean) Size() (n int) {
 func (m *PlayerLeaveGameBean) Size() (n int) {
 	var l int
 	_ = l
-	l = len(m.PlayerTocken)
+	l = len(m.PlayerId)
 	if l > 0 {
 		n += 1 + l + sovBeanHorse(uint64(l))
 	}
@@ -1239,7 +1261,7 @@ func (m *PlayerLeaveGameBean) Size() (n int) {
 func (m *HorseSpeedBean) Size() (n int) {
 	var l int
 	_ = l
-	l = len(m.PlayerTocken)
+	l = len(m.PlayerId)
 	if l > 0 {
 		n += 1 + l + sovBeanHorse(uint64(l))
 	}
@@ -1981,7 +2003,7 @@ func (m *PlayerDeviceBean) Unmarshal(data []byte) error {
 			iNdEx = postIndex
 		case 11:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field PlayerTocken", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field PlayerId", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2006,7 +2028,65 @@ func (m *PlayerDeviceBean) Unmarshal(data []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.PlayerTocken = string(data[iNdEx:postIndex])
+			m.PlayerId = string(data[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 12:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RoomId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowBeanHorse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := data[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthBeanHorse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RoomId = string(data[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 13:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PlayerName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowBeanHorse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := data[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthBeanHorse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PlayerName = string(data[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -2060,7 +2140,7 @@ func (m *PlagerJoinGameBean) Unmarshal(data []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field PlayerTocken", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field PlayerId", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2085,7 +2165,7 @@ func (m *PlagerJoinGameBean) Unmarshal(data []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.PlayerTocken = string(data[iNdEx:postIndex])
+			m.PlayerId = string(data[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -2187,7 +2267,7 @@ func (m *PlayerLeaveGameBean) Unmarshal(data []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field PlayerTocken", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field PlayerId", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2212,7 +2292,7 @@ func (m *PlayerLeaveGameBean) Unmarshal(data []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.PlayerTocken = string(data[iNdEx:postIndex])
+			m.PlayerId = string(data[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -2314,7 +2394,7 @@ func (m *HorseSpeedBean) Unmarshal(data []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field PlayerTocken", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field PlayerId", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2339,7 +2419,7 @@ func (m *HorseSpeedBean) Unmarshal(data []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.PlayerTocken = string(data[iNdEx:postIndex])
+			m.PlayerId = string(data[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {

@@ -72,8 +72,10 @@ message JoinRoomBean{
  * player_client端陀螺仪信息
  */
 message PlayerDeviceBean{
-     string player_tocken = 11;
+     string player_id = 11;
+     string player_name = 13;
      string game_id = 10;
+     string room_id = 12;
      double angle_alpha = 1 ;
      double angle_beta = 2 ;
      double angle_gamma = 3 ;
@@ -91,7 +93,7 @@ message PlayerDeviceBean{
  * player_client加入游戏后，server向game_client发送的新加入的player_client的信息
  */
 message PlagerJoinGameBean{
-	 string player_tocken = 1; //玩家tocken
+	 string player_id = 1; //玩家tocken
 	 string player_name = 2; //玩家姓名
 	 int32 player_level = 3; //玩家等级
 }
@@ -101,7 +103,7 @@ message PlagerJoinGameBean{
  * player_client离开游戏后server向game_client发送的离开房间的player_client的信息
  */
 message PlayerLeaveGameBean{
-   string player_tocken = 1; //玩家tocken
+   string player_id = 1; //玩家tocken
    string player_name = 2; //玩家姓名
    int32 player_level = 3; //玩家等级
 }
@@ -111,7 +113,7 @@ message PlayerLeaveGameBean{
  * 赛马游戏中马的速度
  */
 message HorseSpeedBean{
-   string player_tocken = 1; //玩家tocken
+   string player_id = 1; //玩家tocken
    string player_name = 2; //玩家姓名
    int32 player_level = 3; //玩家等级
    double player_speed = 4; //server计算出的速度

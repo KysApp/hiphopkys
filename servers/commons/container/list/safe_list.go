@@ -127,3 +127,14 @@ func (l *SafeList) RemoveFirstElementWithValue(value interface{}) {
 	}
 	l.Unlock()
 }
+
+func (l *SafeList) Map(process func(interface{}) bool) {
+	l.Lock()
+	for v := l.List.Front(); v != nil; v = v.Next() {
+		isContinue := process(v.Value)
+		if !isContinue {
+			break
+		}
+	}
+	l.Unlock()
+}

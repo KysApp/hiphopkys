@@ -20,6 +20,6 @@ message AppointmentPlayerCacheModel{
 message AppointmentRoomCacheModel{
 	string  appointment_id = 1; //预约ID
 	int32 play_count = 2; //已玩次数
-	repeated AppointmentPlayerCacheModel model_id_array = 3; //预约玩家id列表
+	repeated string model_id_array = 3; //预约玩家id列表
 }
 

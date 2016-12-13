@@ -76,9 +76,45 @@ func CachePushAppointmentUser(model *models.AppointmentPlayerCacheModel) (string
 	if err != nil {
 		return beego.AppConfig.String("errcode::cache_push_appointmentuser_error_inner_code"), beego.AppConfig.String("errcode::cache_push_appointmentuser_error_inner_desc")
 	}
-	_, err = conn.Do("SADD", model.AppointmentId, buffer)
+	conn.Send("MULTI")
+	conn.Do("SADD", model.AppointmentId, buffer)
+	conn.Do("SET", model.UserId, model.AppointmentId)
+	err = conn.Send("EXEC")
 	if err != nil {
 		return beego.AppConfig.String("errcode::cache_push_appointmentuser_error_inner_code"), beego.AppConfig.String("errcode::cache_push_appointmentuser_error_inner_desc")
 	}
-	return "0", "操作成功"
+	// setKey := beego.AppConfig.String("cache::key-appointment-id")
+	// beego.BeeLogger.Debug("sefKey:%s", setKey)
+	return "0", "success"
+}
+
+/**
+ * 查询是否是预约玩家
+ * @param {[type]} userId string) (bool, *models.AppointmentPlayerCacheModel [description]
+ */
+func CachePullAppointmentUser(userId string) (bool, *models.AppointmentPlayerCacheModel) {
+	conn := RedisPool.Get()
+	defer conn.Close()
+	reply, err := conn.Do("GET", userId)
+	if nil != err {
+		return false, nil
+	}
+	appointmentId, err := redis.String(reply, nil)
+	if nil != err {
+		return false, nil
+	}
+	reply2, err := conn.Do("SCARD", appointmentId)
+	bufferArray, err := redis.ByteSlices(reply2, nil)
+	if nil != err {
+		return false, nil
+	}
+	for _, buffer := range bufferArray {
+		player := &models.AppointmentPlayerCacheModel{}
+		if err := player.Unmarshal(buffer); err != nil {
+			if player.UserId == userId {
+				return true, player
+			}
+		}
+	}
+	return false, nil
 }

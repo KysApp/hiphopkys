@@ -1,13 +1,13 @@
 package controllers
 
 import (
-	"github.com/astaxie/beego"
+	// "github.com/astaxie/beego"
 	"github.com/gorilla/websocket"
 	"hiphopkys/servers/commons/container/list"
 	"hiphopkys/servers/commons/container/smap"
 	"hiphopkys/servers/horse/beans"
 	"hiphopkys/servers/horse/models"
-	"sync"
+	// "sync"
 )
 
 var (
@@ -22,6 +22,7 @@ var (
 	RoomId2RoomInstanceMap = smap.New() //记录所有的房间实体
 	WaitPlayerJoinRoomList = list.New() //等待玩家(预约、非预约)加入房间队列
 	PlayingRoomList        = list.New() //正在游戏的房间队列
+	RoomId2PlayingRoomMap  = smap.New() //正在游戏的房间
 )
 
 func init() {
@@ -74,7 +75,7 @@ func loop_room_dispatch() {
 				 */
 				roomModel := (RoomId2RoomInstanceMap.Get(roomID)).(*models.RoomModel)
 				roomModel.PlayerUserIdList.PushBack(roomModel)
-				playerModel := (PlayerId2RoomInstanceMap.Get(playerID)).(*models.PlayerModel)
+				playerModel := (PlayerId2PlayerInstanceMap.Get(playerID)).(*models.PlayerModel)
 				roomModel.AppointmentId = playerModel.AppointmentId
 				WaitPlayerJoinRoomList.PushBack(roomID)
 			}
@@ -110,6 +111,14 @@ func loop_prepare_startgame() {
 		select {
 		case roomID := <-PrepareStartGameRoomChan:
 			WaitPlayerJoinRoomList.RemoveFirstElementWithValue(roomID)
+			roomModel := (RoomId2RoomInstanceMap.Get(roomID)).(*models.RoomModel)
+			roomModel.PlayerUserIdList.Map(func(v interface{}) bool {
+				playerId := v.(string)
+				playerModel := (PlayerId2PlayerInstanceMap.Get(playerId)).(*models.PlayerModel)
+				playerModel.RoomId = roomID
+				return true
+			})
+			RoomId2PlayingRoomMap.Insert(roomID, roomModel)
 			PlayingRoomList.PushBack(roomID)
 			/*
 			 * 通知roomID对应的room下的所有玩家游戏开始
