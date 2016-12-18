@@ -1,9 +1,10 @@
 package beans
 
 type UserCheckData struct {
-	Name   string `json:"name"`
-	Level  int32  `json:"level"`
-	UserId string `json:"user_id"`
+	Name     string `json:"name"`
+	Level    int32  `json:"level"`
+	UserId   string `json:"user_id"`
+	PlayerId string `json:"-"`
 }
 type AppointmentUser struct {
 	UserId             string `json:"user_id"`

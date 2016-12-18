@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	// "github.com/astaxie/beego"
+	"github.com/astaxie/beego"
 	"github.com/gorilla/websocket"
 	"hiphopkys/servers/commons/container/list"
 	"hiphopkys/servers/commons/container/smap"
@@ -40,6 +40,7 @@ func init() {
  */
 func CreateRoomHandler(requestId string, conn *websocket.Conn, bean *beans.CreateRoomBean) {
 	roomModel := models.NewRoomModel(conn, bean.GameId, bean.Longitude, bean.Latitude, bean.DeviceInfo)
+	Conn2RoomIdSmap.Insert(roomModel.Conn, roomModel.RoomId)
 	StorageRoomInstanceChan <- roomModel
 }
 
@@ -74,10 +75,32 @@ func loop_room_dispatch() {
 				 *则需要 1.将该玩家加入房间，2.初始化房间，包括设置房间类型为预约玩家房间和设置预约ID 3.将房间加入WaitPlayerJoinRoomList
 				 */
 				roomModel := (RoomId2RoomInstanceMap.Get(roomID)).(*models.RoomModel)
-				roomModel.PlayerUserIdList.PushBack(roomModel)
 				playerModel := (PlayerId2PlayerInstanceMap.Get(playerID)).(*models.PlayerModel)
+				roomModel.PlayerUserIdList.PushBack(playerID)
+				playerModel.RoomId = roomID
 				roomModel.AppointmentId = playerModel.AppointmentId
+				OnePlayerJoinSign <- playerModel.PlayerId
 				WaitPlayerJoinRoomList.PushBack(roomID)
+				/**
+				 *
+				 */
+				beego.BeeLogger.Error("有新房间(roomId=%s)创建,玩家(playerId=%s,userId=%s)加入房间", roomID, playerModel.PlayerId, playerModel.RoomId)
+				wsResponseBean := beans.ServerSendBean{}
+				wsResponseBean.ResultCode = beego.AppConfig.String("errcode::check_player_waitplay_error_code")
+				wsResponseBean.Desc = beego.AppConfig.String("errcode::check_player_waitplay_error_desc")
+				wsResponseBean.OptionCode = beans.SendMessageOperationCode_SENDMESSAGE_OPERATIONCODE_RESPONSE_PLAYERJOINBEAN
+				wsResponseBean.Bean = &beans.ServerSendBean_ResponseJoinroomBean{
+					ResponseJoinroomBean: &beans.ServerResponseJoinRoomBean{
+						RoomId:   playerModel.RoomId,
+						PlayerId: playerModel.PlayerId,
+					},
+				}
+				if msgBuf, err := wsResponseBean.Marshal(); err == nil {
+					playerModel.Conn.WriteMessage(websocket.BinaryMessage, msgBuf)
+				} else {
+					beego.BeeLogger.Error("加入房间成功(loop_room_dispatch)，但给客户端反馈时的response protobuf marshal失败:%s,这里强制关闭连接", err.Error())
+					playerModel.Conn.Close()
+				}
 			}
 		}
 	}
@@ -95,9 +118,11 @@ func loop_roomstate_update() {
 			if roomModel.Capacity == int32(roomModel.PlayerUserIdList.Len()) { //房间已满可以开始游戏,加入初始化队列
 				PrepareStartGameRoomChan <- roomID
 			}
+
 			/**
 			 * 通知其他玩家现在房间中的玩家playerid list(可选,可以等到最后所有玩家到齐后准备开始游戏时统一返回)
 			 */
+
 		}
 	}
 }
@@ -112,18 +137,21 @@ func loop_prepare_startgame() {
 		case roomID := <-PrepareStartGameRoomChan:
 			WaitPlayerJoinRoomList.RemoveFirstElementWithValue(roomID)
 			roomModel := (RoomId2RoomInstanceMap.Get(roomID)).(*models.RoomModel)
-			roomModel.PlayerUserIdList.Map(func(v interface{}) bool {
-				playerId := v.(string)
-				playerModel := (PlayerId2PlayerInstanceMap.Get(playerId)).(*models.PlayerModel)
-				playerModel.RoomId = roomID
-				return true
-			})
+			// roomModel.PlayerUserIdList.Map(func(v interface{}) bool {
+			// 	playerId := v.(string)
+			// 	playerModel := (PlayerId2PlayerInstanceMap.Get(playerId)).(*models.PlayerModel)
+			// 	playerModel.RoomId = roomID
+			// 	return true
+			// })
 			RoomId2PlayingRoomMap.Insert(roomID, roomModel)
 			PlayingRoomList.PushBack(roomID)
 			/*
-			 * 通知roomID对应的room下的所有玩家游戏开始
+			 * 通知TV端与手机端开始游戏
 			 *
 			 */
+
+			beego.BeeLogger.Error("开始游戏,房间信息:%#v", roomModel)
+
 		}
 	}
 }

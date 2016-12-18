@@ -97,23 +97,34 @@ func CachePullAppointmentUser(userId string) (bool, *models.AppointmentPlayerCac
 	defer conn.Close()
 	reply, err := conn.Do("GET", userId)
 	if nil != err {
+		beego.BeeLogger.Error("redies查找失败1:%s", err.Error())
 		return false, nil
 	}
 	appointmentId, err := redis.String(reply, nil)
 	if nil != err {
+		beego.BeeLogger.Error("redies查找失败2:%s,%#v,userid:%s", err.Error(), reply, userId)
 		return false, nil
 	}
-	reply2, err := conn.Do("SCARD", appointmentId)
-	bufferArray, err := redis.ByteSlices(reply2, nil)
+
+	reply, err = conn.Do("SMEMBERS", appointmentId)
 	if nil != err {
+		beego.BeeLogger.Error("redies查找失败3:%s,%#v,userid:%s,appointmentId:%s", err.Error(), reply, userId, appointmentId)
 		return false, nil
 	}
-	for _, buffer := range bufferArray {
+
+	byteBufferArray, err := redis.ByteSlices(reply, nil)
+	if nil != err {
+		beego.BeeLogger.Error("redies查找失败3:%s,%#v,userid:%s,appointmentId:%s", err.Error(), reply, userId, appointmentId)
+		return false, nil
+	}
+	for _, buffer := range byteBufferArray {
 		player := &models.AppointmentPlayerCacheModel{}
-		if err := player.Unmarshal(buffer); err != nil {
+		if err := player.Unmarshal(buffer); err == nil {
 			if player.UserId == userId {
 				return true, player
 			}
+		} else {
+			beego.BeeLogger.Error("redies查找失败6:%s", appointmentId)
 		}
 	}
 	return false, nil

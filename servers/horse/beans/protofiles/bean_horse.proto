@@ -34,9 +34,11 @@ enum RequestOperationCode{ //操作代码
  */
 enum SendMessageOperationCode{ //操作代码
     SENDMESSAGE_OPERATIONCODE_RESPONSE = 0; //针对特定客户端的请求
-    SENDMESSAGE_OPERATIONCODE_PLAYERJOINGAME = 1; //新玩家加入游戏
-    SENDMESSAGE_OPERATIONCODE_PLAYERDEVICE = 2; //玩家陀螺仪信息
-    SENDMESSAGE_OPERATIONCODE_HORSEGAME_SPEED = 3; //赛马游戏server计算出的速度
+    SENDMESSAGE_OPERATIONCODE_RESPONSE_PLAYERJOINBEAN = 1;//新玩家加入游戏的响应(server->client)
+    SENDMESSAGE_OPERATIONCODE_PLAYERJOINGAME = 2; //新玩家加入游戏(server->game_client)
+    SENDMESSAGE_OPERATIONCODE_PLAYERDEVICE = 3; //玩家陀螺仪信息
+    SENDMESSAGE_OPERATIONCODE_HORSEGAME_SPEED = 4; //赛马游戏server计算出的速度
+
 }
 
 /**
@@ -93,9 +95,10 @@ message PlayerDeviceBean{
  * player_client加入游戏后，server向game_client发送的新加入的player_client的信息
  */
 message PlagerJoinGameBean{
-	 string player_id = 1; //玩家tocken
-	 string player_name = 2; //玩家姓名
-	 int32 player_level = 3; //玩家等级
+	 string player_id = 1; //玩家id
+   string player_tocken = 2; //玩家tocken
+	 string player_name = 3; //玩家姓名
+	 int32 player_level = 4; //玩家等级
 }
 
 /**
@@ -131,7 +134,8 @@ message ServerResponseCreateRoomBean{
  * 针对player_client申请加入房间的响应
  */
 message ServerResponseJoinRoomBean{
-   string room_id = 1;
+   string room_id = 1; //只有成功加入房间后才会返回room_id
+   string player_id = 2;
 }
 
 
@@ -146,10 +150,10 @@ message ServerResponseJoinRoomBean{
  * server向client发送的数据(响应，玩家加入与离开，玩家陀螺仪数据等)
  */
 message ServerSendBean{
-   int32 result_code = 1 ;
+   string result_code = 1 ;
    string request_id = 2; //客户端请求ID(ClientRequestBean中的)
    string desc = 3; //返回数据的描述
-   RequestOperationCode option_code = 4; //用户操作代码
+   SendMessageOperationCode option_code = 4; //用户操作代码
   oneof Bean{
     ServerResponseCreateRoomBean response_createroom_bean = 5; 
     ServerResponseJoinRoomBean response_joinroom_bean = 6;

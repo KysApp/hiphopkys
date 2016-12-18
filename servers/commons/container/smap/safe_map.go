@@ -6,17 +6,17 @@ import (
 
 type SafeMap struct {
 	sync.RWMutex
-	Map map[string]interface{}
+	Map map[interface{}]interface{}
 }
 
 func New() *SafeMap {
 	m := &SafeMap{
-		Map: make(map[string]interface{}),
+		Map: make(map[interface{}]interface{}),
 	}
 	return m
 }
 
-func (m *SafeMap) Insert(k string, v interface{}) {
+func (m *SafeMap) Insert(k interface{}, v interface{}) {
 	m.Lock()
 	m.Map[k] = v
 	m.Unlock()
@@ -29,20 +29,20 @@ func (m *SafeMap) Len() int {
 	return length
 }
 
-func (m *SafeMap) Remove(k string) {
+func (m *SafeMap) Remove(k interface{}) {
 	m.Lock()
 	delete(m.Map, k)
 	m.Unlock()
 }
 
-func (m *SafeMap) Get(k string) interface{} {
+func (m *SafeMap) Get(k interface{}) interface{} {
 	m.RLock()
 	v := (m.Map)[k]
 	m.RUnlock()
 	return v
 }
 
-func (m *SafeMap) IsExistence(k string) bool {
+func (m *SafeMap) IsExistence(k interface{}) bool {
 	m.RLock()
 	_, ok := (m.Map)[k]
 	m.RUnlock()

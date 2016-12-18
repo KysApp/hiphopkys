@@ -1,11 +1,18 @@
 package controllers
 
 import (
+	"encoding/json"
 	"github.com/astaxie/beego"
 	"github.com/gorilla/websocket"
+	"hiphopkys/servers/commons/container/smap"
 	"hiphopkys/servers/horse/beans"
 	"hiphopkys/servers/horse/models"
 	"net/http"
+)
+
+var (
+	Conn2PlayerIdSmap = smap.New()
+	Conn2RoomIdSmap   = smap.New()
 )
 
 type SocketmanController struct {
@@ -15,14 +22,19 @@ type SocketmanController struct {
 func (this *SocketmanController) WebSocketJoin() {
 	beego.BeeLogger.Error("执行到WebSocketJoin()")
 	// Upgrade from http request to WebSocket.
-	ws, err := websocket.Upgrade(this.Ctx.ResponseWriter, this.Ctx.Request, nil, 1024, 1024)
+	responseBean := &beans.RPCResponse{}
+	responseBean.ErrorCode = "0"
+	responseBean.Desc = "success"
+	ws, err := websocket.Upgrade(this.Ctx.ResponseWriter, this.Ctx.Request, nil, 2048, 2048)
 	if _, ok := err.(websocket.HandshakeError); ok {
 		beego.BeeLogger.Error("SocketmanController::WebSocketJoin(),Not a websocket handshake:%s", err.Error())
 		http.Error(this.Ctx.ResponseWriter, "Not a websocket handshake", 400)
-		return
+		responseBean.ErrorCode = beego.AppConfig.String("errcode::websocket_nothandler_error_code")
+		responseBean.Desc = beego.AppConfig.String("errcode::websocket_nothandler_error_desc")
 	} else if err != nil {
 		beego.BeeLogger.Error("SocketmanController::WebSocketJoin(),Cannot setup WebSocket connection:%s", err.Error())
-		return
+		responseBean.ErrorCode = beego.AppConfig.String("errcode::websocket_conn_error_code")
+		responseBean.Desc = beego.AppConfig.String("errcode::websocket_conn_error_desc")
 	}
 
 	go func(ws *websocket.Conn) {
@@ -31,6 +43,19 @@ func (this *SocketmanController) WebSocketJoin() {
 			_, buffer, err := ws.ReadMessage()
 			if err != nil {
 				beego.BeeLogger.Error("SocketmanController::WebSocketJoin(),读取消息失败:%s", err.Error())
+				if websocket.IsCloseError(err, websocket.CloseNormalClosure) ||
+					websocket.IsCloseError(err, websocket.CloseGoingAway) ||
+					websocket.IsCloseError(err, websocket.CloseProtocolError) ||
+					websocket.IsCloseError(err, websocket.CloseUnsupportedData) ||
+					websocket.IsCloseError(err, websocket.CloseNoStatusReceived) ||
+					websocket.IsCloseError(err, websocket.CloseAbnormalClosure) ||
+					websocket.IsCloseError(err, websocket.CloseInvalidFramePayloadData) ||
+					websocket.IsCloseError(err, websocket.CloseMessageTooBig) ||
+					websocket.IsCloseError(err, websocket.CloseServiceRestart) ||
+					websocket.IsCloseError(err, websocket.CloseTryAgainLater) ||
+					websocket.IsCloseError(err, websocket.CloseTLSHandshake) {
+					break
+				}
 				continue
 			}
 			bean := beans.ClientRequestBean{}
@@ -61,16 +86,26 @@ func (this *SocketmanController) WebSocketJoin() {
 		}
 	}(ws)
 
+	buf, _ := json.Marshal(responseBean)
+	this.Ctx.WriteString(string(buf))
 }
 
 func BroadcastWebSocket(bean *beans.PlayerDeviceBean) {
 	beego.BeeLogger.Error("收到数据:%#v", bean)
-	v := RoomId2PlayingRoomMap.Get(bean.RoomId)
-	if nil != v {
-		roomModel := (v).(*models.RoomModel)
-		beego.BeeLogger.Error("房间信息:%#v", roomModel)
-		if buffer, err := bean.Marshal(); err == nil {
-			roomModel.Conn.WriteMessage(websocket.BinaryMessage, buffer)
-		}
+	wsResponseBean := beans.ServerSendBean{}
+	wsResponseBean.OptionCode = beans.SendMessageOperationCode_SENDMESSAGE_OPERATIONCODE_PLAYERDEVICE
+	wsResponseBean.Bean = &beans.ServerSendBean_PlayerDeviceBean{
+		PlayerDeviceBean: bean,
 	}
+	if msgBuf, err := wsResponseBean.Marshal(); nil == err {
+		v := RoomId2PlayingRoomMap.Get(bean.RoomId)
+		if nil != v {
+			roomModel := (v).(*models.RoomModel)
+			beego.BeeLogger.Error("房间信息:%#v", roomModel)
+			roomModel.Conn.WriteMessage(websocket.BinaryMessage, msgBuf)
+		}
+	} else {
+		beego.BeeLogger.Error("BroadcastWebSocket中protobuf转换错误:%s", err.Error())
+	}
+
 }

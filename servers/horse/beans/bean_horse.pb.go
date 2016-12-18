@@ -63,23 +63,26 @@ func (x RequestOperationCode) String() string {
 type SendMessageOperationCode int32
 
 const (
-	SendMessageOperationCode_SENDMESSAGE_OPERATIONCODE_RESPONSE        SendMessageOperationCode = 0
-	SendMessageOperationCode_SENDMESSAGE_OPERATIONCODE_PLAYERJOINGAME  SendMessageOperationCode = 1
-	SendMessageOperationCode_SENDMESSAGE_OPERATIONCODE_PLAYERDEVICE    SendMessageOperationCode = 2
-	SendMessageOperationCode_SENDMESSAGE_OPERATIONCODE_HORSEGAME_SPEED SendMessageOperationCode = 3
+	SendMessageOperationCode_SENDMESSAGE_OPERATIONCODE_RESPONSE                SendMessageOperationCode = 0
+	SendMessageOperationCode_SENDMESSAGE_OPERATIONCODE_RESPONSE_PLAYERJOINBEAN SendMessageOperationCode = 1
+	SendMessageOperationCode_SENDMESSAGE_OPERATIONCODE_PLAYERJOINGAME          SendMessageOperationCode = 2
+	SendMessageOperationCode_SENDMESSAGE_OPERATIONCODE_PLAYERDEVICE            SendMessageOperationCode = 3
+	SendMessageOperationCode_SENDMESSAGE_OPERATIONCODE_HORSEGAME_SPEED         SendMessageOperationCode = 4
 )
 
 var SendMessageOperationCode_name = map[int32]string{
 	0: "SENDMESSAGE_OPERATIONCODE_RESPONSE",
-	1: "SENDMESSAGE_OPERATIONCODE_PLAYERJOINGAME",
-	2: "SENDMESSAGE_OPERATIONCODE_PLAYERDEVICE",
-	3: "SENDMESSAGE_OPERATIONCODE_HORSEGAME_SPEED",
+	1: "SENDMESSAGE_OPERATIONCODE_RESPONSE_PLAYERJOINBEAN",
+	2: "SENDMESSAGE_OPERATIONCODE_PLAYERJOINGAME",
+	3: "SENDMESSAGE_OPERATIONCODE_PLAYERDEVICE",
+	4: "SENDMESSAGE_OPERATIONCODE_HORSEGAME_SPEED",
 }
 var SendMessageOperationCode_value = map[string]int32{
-	"SENDMESSAGE_OPERATIONCODE_RESPONSE":        0,
-	"SENDMESSAGE_OPERATIONCODE_PLAYERJOINGAME":  1,
-	"SENDMESSAGE_OPERATIONCODE_PLAYERDEVICE":    2,
-	"SENDMESSAGE_OPERATIONCODE_HORSEGAME_SPEED": 3,
+	"SENDMESSAGE_OPERATIONCODE_RESPONSE":                0,
+	"SENDMESSAGE_OPERATIONCODE_RESPONSE_PLAYERJOINBEAN": 1,
+	"SENDMESSAGE_OPERATIONCODE_PLAYERJOINGAME":          2,
+	"SENDMESSAGE_OPERATIONCODE_PLAYERDEVICE":            3,
+	"SENDMESSAGE_OPERATIONCODE_HORSEGAME_SPEED":         4,
 }
 
 func (x SendMessageOperationCode) String() string {
@@ -144,9 +147,10 @@ func (*PlayerDeviceBean) ProtoMessage()    {}
 // server -> client
 // player_client加入游戏后，server向game_client发送的新加入的player_client的信息
 type PlagerJoinGameBean struct {
-	PlayerId    string `protobuf:"bytes,1,opt,name=player_id,proto3" json:"player_id,omitempty"`
-	PlayerName  string `protobuf:"bytes,2,opt,name=player_name,proto3" json:"player_name,omitempty"`
-	PlayerLevel int32  `protobuf:"varint,3,opt,name=player_level,proto3" json:"player_level,omitempty"`
+	PlayerId     string `protobuf:"bytes,1,opt,name=player_id,proto3" json:"player_id,omitempty"`
+	PlayerTocken string `protobuf:"bytes,2,opt,name=player_tocken,proto3" json:"player_tocken,omitempty"`
+	PlayerName   string `protobuf:"bytes,3,opt,name=player_name,proto3" json:"player_name,omitempty"`
+	PlayerLevel  int32  `protobuf:"varint,4,opt,name=player_level,proto3" json:"player_level,omitempty"`
 }
 
 func (m *PlagerJoinGameBean) Reset()         { *m = PlagerJoinGameBean{} }
@@ -194,7 +198,8 @@ func (*ServerResponseCreateRoomBean) ProtoMessage()    {}
 // *
 // 针对player_client申请加入房间的响应
 type ServerResponseJoinRoomBean struct {
-	RoomId string `protobuf:"bytes,1,opt,name=room_id,proto3" json:"room_id,omitempty"`
+	RoomId   string `protobuf:"bytes,1,opt,name=room_id,proto3" json:"room_id,omitempty"`
+	PlayerId string `protobuf:"bytes,2,opt,name=player_id,proto3" json:"player_id,omitempty"`
 }
 
 func (m *ServerResponseJoinRoomBean) Reset()         { *m = ServerResponseJoinRoomBean{} }
@@ -205,10 +210,10 @@ func (*ServerResponseJoinRoomBean) ProtoMessage()    {}
 // server -> client
 // server向client发送的数据(响应，玩家加入与离开，玩家陀螺仪数据等)
 type ServerSendBean struct {
-	ResultCode int32                `protobuf:"varint,1,opt,name=result_code,proto3" json:"result_code,omitempty"`
-	RequestId  string               `protobuf:"bytes,2,opt,name=request_id,proto3" json:"request_id,omitempty"`
-	Desc       string               `protobuf:"bytes,3,opt,name=desc,proto3" json:"desc,omitempty"`
-	OptionCode RequestOperationCode `protobuf:"varint,4,opt,name=option_code,proto3,enum=beans.RequestOperationCode" json:"option_code,omitempty"`
+	ResultCode string                   `protobuf:"bytes,1,opt,name=result_code,proto3" json:"result_code,omitempty"`
+	RequestId  string                   `protobuf:"bytes,2,opt,name=request_id,proto3" json:"request_id,omitempty"`
+	Desc       string                   `protobuf:"bytes,3,opt,name=desc,proto3" json:"desc,omitempty"`
+	OptionCode SendMessageOperationCode `protobuf:"varint,4,opt,name=option_code,proto3,enum=beans.SendMessageOperationCode" json:"option_code,omitempty"`
 	// Types that are valid to be assigned to Bean:
 	//	*ServerSendBean_ResponseCreateroomBean
 	//	*ServerSendBean_ResponseJoinroomBean
@@ -749,14 +754,20 @@ func (m *PlagerJoinGameBean) MarshalTo(data []byte) (int, error) {
 		i = encodeVarintBeanHorse(data, i, uint64(len(m.PlayerId)))
 		i += copy(data[i:], m.PlayerId)
 	}
-	if len(m.PlayerName) > 0 {
+	if len(m.PlayerTocken) > 0 {
 		data[i] = 0x12
+		i++
+		i = encodeVarintBeanHorse(data, i, uint64(len(m.PlayerTocken)))
+		i += copy(data[i:], m.PlayerTocken)
+	}
+	if len(m.PlayerName) > 0 {
+		data[i] = 0x1a
 		i++
 		i = encodeVarintBeanHorse(data, i, uint64(len(m.PlayerName)))
 		i += copy(data[i:], m.PlayerName)
 	}
 	if m.PlayerLevel != 0 {
-		data[i] = 0x18
+		data[i] = 0x20
 		i++
 		i = encodeVarintBeanHorse(data, i, uint64(m.PlayerLevel))
 	}
@@ -888,6 +899,12 @@ func (m *ServerResponseJoinRoomBean) MarshalTo(data []byte) (int, error) {
 		i = encodeVarintBeanHorse(data, i, uint64(len(m.RoomId)))
 		i += copy(data[i:], m.RoomId)
 	}
+	if len(m.PlayerId) > 0 {
+		data[i] = 0x12
+		i++
+		i = encodeVarintBeanHorse(data, i, uint64(len(m.PlayerId)))
+		i += copy(data[i:], m.PlayerId)
+	}
 	return i, nil
 }
 
@@ -906,10 +923,11 @@ func (m *ServerSendBean) MarshalTo(data []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.ResultCode != 0 {
-		data[i] = 0x8
+	if len(m.ResultCode) > 0 {
+		data[i] = 0xa
 		i++
-		i = encodeVarintBeanHorse(data, i, uint64(m.ResultCode))
+		i = encodeVarintBeanHorse(data, i, uint64(len(m.ResultCode)))
+		i += copy(data[i:], m.ResultCode)
 	}
 	if len(m.RequestId) > 0 {
 		data[i] = 0x12
@@ -1231,6 +1249,10 @@ func (m *PlagerJoinGameBean) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovBeanHorse(uint64(l))
 	}
+	l = len(m.PlayerTocken)
+	if l > 0 {
+		n += 1 + l + sovBeanHorse(uint64(l))
+	}
 	l = len(m.PlayerName)
 	if l > 0 {
 		n += 1 + l + sovBeanHorse(uint64(l))
@@ -1298,14 +1320,19 @@ func (m *ServerResponseJoinRoomBean) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovBeanHorse(uint64(l))
 	}
+	l = len(m.PlayerId)
+	if l > 0 {
+		n += 1 + l + sovBeanHorse(uint64(l))
+	}
 	return n
 }
 
 func (m *ServerSendBean) Size() (n int) {
 	var l int
 	_ = l
-	if m.ResultCode != 0 {
-		n += 1 + sovBeanHorse(uint64(m.ResultCode))
+	l = len(m.ResultCode)
+	if l > 0 {
+		n += 1 + l + sovBeanHorse(uint64(l))
 	}
 	l = len(m.RequestId)
 	if l > 0 {
@@ -2169,6 +2196,35 @@ func (m *PlagerJoinGameBean) Unmarshal(data []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PlayerTocken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowBeanHorse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := data[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthBeanHorse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PlayerTocken = string(data[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field PlayerName", wireType)
 			}
 			var stringLen uint64
@@ -2196,7 +2252,7 @@ func (m *PlagerJoinGameBean) Unmarshal(data []byte) error {
 			}
 			m.PlayerName = string(data[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 3:
+		case 4:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field PlayerLevel", wireType)
 			}
@@ -2664,6 +2720,35 @@ func (m *ServerResponseJoinRoomBean) Unmarshal(data []byte) error {
 			}
 			m.RoomId = string(data[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PlayerId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowBeanHorse
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := data[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthBeanHorse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PlayerId = string(data[iNdEx:postIndex])
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipBeanHorse(data[iNdEx:])
@@ -2715,10 +2800,10 @@ func (m *ServerSendBean) Unmarshal(data []byte) error {
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field ResultCode", wireType)
 			}
-			m.ResultCode = 0
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowBeanHorse
@@ -2728,11 +2813,21 @@ func (m *ServerSendBean) Unmarshal(data []byte) error {
 				}
 				b := data[iNdEx]
 				iNdEx++
-				m.ResultCode |= (int32(b) & 0x7F) << shift
+				stringLen |= (uint64(b) & 0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthBeanHorse
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResultCode = string(data[iNdEx:postIndex])
+			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field RequestId", wireType)
@@ -2805,7 +2900,7 @@ func (m *ServerSendBean) Unmarshal(data []byte) error {
 				}
 				b := data[iNdEx]
 				iNdEx++
-				m.OptionCode |= (RequestOperationCode(b) & 0x7F) << shift
+				m.OptionCode |= (SendMessageOperationCode(b) & 0x7F) << shift
 				if b < 0x80 {
 					break
 				}
